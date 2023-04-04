@@ -1,5 +1,5 @@
 # Crypto-Exchange-Tools
-A C# library to help interact with Centralized and Desentralized Crypto Exchanges
+A C# library to help interact with Centralized and Decentralized Crypto Exchanges
 
 ## Usage
 ### Withdrawing from binance example
