@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Net;
+using System.Xml.Linq;
 using CryptoExchangeTools.Models.Binance.Wallet;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using static CryptoExchangeTools.Models.Binance.Wallet.CoinInformation;
 using static CryptoExchangeTools.Models.Binance.Wallet.CoinInformation.WithdrawHistoryRecord;
+using static CryptoExchangeTools.Models.Binance.Wallet.DepositHistory;
 
 namespace CryptoExchangeTools.BinanceRequests.Wallet;
 
@@ -274,9 +276,7 @@ public static class Wallet
 
         var response = client.restClient.Execute(request);
 
-        var data = response.Deserialize<CoinInformation[]>();
-
-        return data;
+        return response.Deserialize<CoinInformation[]>();
     }
 
     /// <summary>
@@ -291,9 +291,221 @@ public static class Wallet
 
         var response = await client.restClient.ExecuteAsync(request);
 
-        var data = response.Deserialize<CoinInformation[]>();
+        return response.Deserialize<CoinInformation[]>();
+    }
 
-        return data;
+
+
+    /// <summary>
+    /// Get user asset.
+    /// </summary>
+    /// <param name="client">Asset name.</param>
+    /// <param name="asset">Whether need btc valuation or not, default is true.</param>
+    /// <param name="needBtcValuation"></param>
+    /// <returns>Asset information.</returns>
+    public static UserAsset GetUserAsset(this BinanceClient client, string asset, bool needBtcValuation = true)
+    {
+        var request = new RestRequest("/sapi/v3/asset/getUserAsset", Method.Post);
+        request.AddParameter("asset", asset);
+
+        if (needBtcValuation)
+            request.AddParameter("needBtcValuation", needBtcValuation);
+
+        client.SignRequest(request);
+
+        var response = client.restClient.Execute(request);
+
+        var data = response.Deserialize<UserAsset[]>();
+
+        if (!data.Any())
+            return new UserAsset(asset, "0", "0", "0", "0", "0");
+
+        return data.Single();
+    }
+
+    /// <summary>
+    /// Get user asset.
+    /// </summary>
+    /// <param name="client">Asset name.</param>
+    /// <param name="asset">Whether need btc valuation or not, default is true.</param>
+    /// <param name="needBtcValuation"></param>
+    /// <returns>Asset information.</returns>
+    public static async Task<UserAsset> GetUserAssetAsync(this BinanceClient client, string asset, bool needBtcValuation = true)
+    {
+        var request = new RestRequest("/sapi/v3/asset/getUserAsset", Method.Post);
+        request.AddParameter("asset", asset);
+
+        if (needBtcValuation)
+            request.AddParameter("needBtcValuation", needBtcValuation);
+
+        client.SignRequest(request);
+
+        var response = await client.restClient.ExecuteAsync(request);
+
+        var data = response.Deserialize<UserAsset[]>();
+
+        if (!data.Any())
+            return new UserAsset(asset, "0", "0", "0", "0", "0");
+
+        return data.Single();
+    }
+
+
+
+    /// <summary>
+    /// Get all user assets with non-zero balances.
+    /// </summary>
+    /// <param name="client"></param>
+    /// <param name="needBtcValuation"></param>
+    /// <returns>Assets information.</returns>
+    public static UserAsset[] GetUserAssets(this BinanceClient client, bool needBtcValuation = true)
+    {
+        var request = new RestRequest("sapi/v3/asset/getUserAsset", Method.Post);
+
+        if (needBtcValuation)
+            request.AddParameter("needBtcValuation", needBtcValuation);
+
+        client.SignRequest(request);
+
+        var response = client.restClient.Execute(request);
+
+        return response.Deserialize<UserAsset[]>();
+    }
+
+    /// <summary>
+    /// Get all user assets with non-zero balances.
+    /// </summary>
+    /// <param name="client"></param>
+    /// <param name="needBtcValuation"></param>
+    /// <returns>Assets information.</returns>
+    public static async Task<UserAsset[]> GetUserAssetsAsync(this BinanceClient client, bool needBtcValuation = true)
+    {
+        var request = new RestRequest("sapi/v3/asset/getUserAsset", Method.Post);
+
+        if (needBtcValuation)
+            request.AddParameter("needBtcValuation", needBtcValuation);
+
+        client.SignRequest(request);
+
+        var response = await client.restClient.ExecuteAsync(request);
+
+        return response.Deserialize<UserAsset[]>();
+    }
+
+
+    /// <summary>
+    /// Fetch deposit history.
+    /// </summary>
+    /// <param name="client"></param>
+    /// <param name="coin">Coin name.</param>
+    /// <param name="txId">Transaction hash.</param>
+    /// <param name="status">0(0:pending,6: credited but cannot withdraw, 7=Wrong Deposit,8=Waiting User confirm, 1:success)</param>
+    /// <param name="startTime">Default: 90 days from current timestamp</param>
+    /// <param name="endTime">Default: present timestamp</param>
+    /// <param name="offset">Default:0</param>
+    /// <param name="limit">Default:1000, Max:1000</param>
+    /// <param name="recvWindow"></param>
+    /// <returns>Array of deposit history.</returns>
+    public static DepositHistory[] GetDepositHistory(
+        this BinanceClient client,
+        string? coin = null,
+        string? txId = null,
+        DepositStatus? status = null,
+        long startTime = -1,
+        long endTime = -1,
+        int offset = -1,
+        int limit = -1,
+        long recvWindow = -1)
+    {
+        var request = new RestRequest("sapi/v1/capital/deposit/hisrec", Method.Get);
+
+        if (coin is not null)
+            request.AddParameter("coin", coin);
+
+        if (txId is not null)
+            request.AddParameter("txId", txId);
+
+        if (status is not null)
+            request.AddParameter("status", (int)status);
+
+        if (startTime != -1)
+            request.AddParameter("startTime", startTime);
+
+        if (endTime != -1)
+            request.AddParameter("endTime", endTime);
+
+        if (offset != -1)
+            request.AddParameter("offset", offset);
+
+        if (limit != -1)
+            request.AddParameter("limit", limit);
+
+        if (recvWindow != -1)
+            request.AddParameter("recvWindow", recvWindow);
+
+        client.SignRequest(request);
+
+        var response = client.restClient.Execute(request);
+
+        return response.Deserialize<DepositHistory[]>();
+    }
+
+
+    /// <summary>
+    /// Fetch deposit history.
+    /// </summary>
+    /// <param name="client"></param>
+    /// <param name="coin">Coin name.</param>
+    /// <param name="txId">Transaction hash.</param>
+    /// <param name="status">0(0:pending,6: credited but cannot withdraw, 7=Wrong Deposit,8=Waiting User confirm, 1:success)</param>
+    /// <param name="startTime">Default: 90 days from current timestamp</param>
+    /// <param name="endTime">Default: present timestamp</param>
+    /// <param name="offset">Default:0</param>
+    /// <param name="limit">Default:1000, Max:1000</param>
+    /// <param name="recvWindow"></param>
+    /// <returns>Array of deposit history.</returns>
+    public static async Task<DepositHistory[]> GetDepositHistoryAsync(
+        this BinanceClient client,
+        string? coin = null,
+        string? txId = null,
+        DepositStatus? status = null,
+        long startTime = -1,
+        long endTime = -1,
+        int offset = -1,
+        int limit = -1,
+        long recvWindow = -1)
+    {
+        var request = new RestRequest("sapi/v1/capital/deposit/hisrec", Method.Get);
+
+        if (coin is not null)
+            request.AddParameter("coin", coin);
+
+        if (txId is not null)
+            request.AddParameter("txId", txId);
+
+        if (status is not null)
+            request.AddParameter("status", (int)status);
+
+        if (startTime != -1)
+            request.AddParameter("startTime", startTime);
+
+        if (endTime != -1)
+            request.AddParameter("endTime", endTime);
+
+        if (offset != -1)
+            request.AddParameter("offset", offset);
+
+        if (limit != -1)
+            request.AddParameter("limit", limit);
+
+        if (recvWindow != -1)
+            request.AddParameter("recvWindow", recvWindow);
+
+        client.SignRequest(request);
+
+        var response = await client.restClient.ExecuteAsync(request);
+
+        return response.Deserialize<DepositHistory[]>();
     }
 
     #endregion Original Methods
@@ -335,6 +547,8 @@ public static class Wallet
             if (history.Any())
             {
                 var txData = history.Where(x => x.id == withdrawalId).Single();
+
+                client.Message(txData.status.ToString());
 
                 if (txData.status == WithdrawStatus.Completed)
                     return txData.txId;
@@ -387,6 +601,8 @@ public static class Wallet
             {
                 var txData = history.Where(x => x.id == withdrawalId).Single();
 
+                client.Message(txData.status.ToString());
+
                 if (txData.status == WithdrawStatus.Completed)
                     return txData.txId;
 
@@ -399,6 +615,125 @@ public static class Wallet
             await Task.Delay(10_000);
             limit--;
         }
+    }
+
+    //public static async Task<decimal> GetCoinFreeAmountAsync(this BinanceClient client, string coin)
+    //{
+
+    //}
+
+
+
+    /// <summary>
+    /// Get information of coin.
+    /// </summary>
+    /// <param name="client"></param>
+    /// <param name="name">Coin name.</param>
+    /// <param name="network">Network name (optional).</param>
+    /// <returns>Information on a coin.</returns>
+    public static CoinInformation GetCoinInformation(this BinanceClient client, string name, string? network = null)
+    {
+        var infos = client.GetAllCoinsInformation();
+
+        var info = infos.Where(x => x.coin.ToLower() == name.ToLower()).Single();
+
+        if (network is not null)
+            info.networkList = info.networkList.Where(x => x.network.ToLower() == network.ToLower()).ToList();
+
+        return info;
+    }
+
+
+    /// <summary>
+    /// Get information of coin.
+    /// </summary>
+    /// <param name="client"></param>
+    /// <param name="name">Coin name.</param>
+    /// <param name="network">Network name (optional).</param>
+    /// <returns>Information on a coin.</returns>
+    public static async Task<CoinInformation> GetCoinInformationAsync(this BinanceClient client, string name, string? network = null)
+    {
+        var infos = await client.GetAllCoinsInformationAsync();
+
+        var info = infos.Where(x => x.coin.ToLower() == name.ToLower()).Single();
+
+        if (network is not null)
+            info.networkList = info.networkList.Where(x => x.network.ToLower() == network.ToLower()).ToList();
+
+        return info;
+    }
+    
+
+
+    /// <summary>
+    /// Request withdrawal of all free asset balance and wait untill it leave Binance
+    /// </summary>
+    /// <param name="client"></param>
+    /// <param name="coin">asset name.</param>
+    /// <param name="address">destination address</param>
+    /// <param name="network">spicify the network</param>
+    /// <param name="addressTag">sSecondary address identifier for coins like XRP,XMR etc.</param>
+    /// <param name="walletType">The wallet type for withdraw，0-spot wallet ，1-funding wallet. Default walletType is the current "selected wallet" under wallet->Fiat and Spot/Funding->Deposit</param>
+    /// <returns>transaction hashs</returns>
+    /// <exception cref="RequestNotSuccessfulException"></exception>
+    /// <exception cref="WithdrawalFailedException"></exception>
+    public static string WithdrawAllCoinBalanceAndWaitForSent(
+        this BinanceClient client,
+        string coin,
+        string address,
+        string network,
+        string? addressTag = null,
+        int walletType = -1)
+    {
+        var asset = client.GetUserAsset(coin);
+
+        var info = client.GetCoinInformation(coin, network);
+
+        var decimals = info.networkList.Single().withdrawIntegerMultiple;
+
+        var rounding = 1 / decimals;
+
+        var amount = Math.Floor(asset.free * rounding) / rounding;
+
+        client.Message($"Starting withdrawal of {amount} {coin}");
+
+        return client.WithdrawAndWaitForSent(coin, amount, address, network, addressTag, walletType);
+    }
+
+
+    /// <summary>
+    /// Request withdrawal of all free asset balance and wait untill it leave Binance
+    /// </summary>
+    /// <param name="client"></param>
+    /// <param name="coin">asset name.</param>
+    /// <param name="address">destination address</param>
+    /// <param name="network">spicify the network</param>
+    /// <param name="addressTag">sSecondary address identifier for coins like XRP,XMR etc.</param>
+    /// <param name="walletType">The wallet type for withdraw，0-spot wallet ，1-funding wallet. Default walletType is the current "selected wallet" under wallet->Fiat and Spot/Funding->Deposit</param>
+    /// <returns>transaction hashs</returns>
+    /// <exception cref="RequestNotSuccessfulException"></exception>
+    /// <exception cref="WithdrawalFailedException"></exception>
+    public static async Task<string> WithdrawAllCoinBalanceAndWaitForSentAsync(
+        this BinanceClient client,
+        string coin,
+        string address,
+        string network,
+        string? addressTag = null,
+        int walletType = -1)
+    {
+        var asset = await client.GetUserAssetAsync(coin);
+
+        var info = await client.GetCoinInformationAsync(coin, network);
+
+        var decimals = info.networkList.Single().withdrawIntegerMultiple;
+
+        var rounding = 1 / decimals;
+
+        var amount = Math.Floor(asset.free * rounding) / rounding;
+
+        client.Message($"Starting withdrawal of {amount} {coin}");
+
+        return await client.WithdrawAndWaitForSentAsync(coin, amount, address, network, addressTag, walletType);
     }
 
     #endregion Derived Methods

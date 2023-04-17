@@ -4,7 +4,7 @@ using RestSharp;
 
 namespace CryptoExchangeTools;
 
-internal static class RestResponseExtensions
+internal static class RestResponseExtension
 {
 	internal static T Deserialize<T>(this RestResponse response)
 	{

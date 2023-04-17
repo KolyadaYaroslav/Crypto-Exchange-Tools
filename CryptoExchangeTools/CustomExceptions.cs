@@ -55,3 +55,12 @@ public class WithdrawalFailedException : Exception
     }
 }
 
+public class AssetIsNullException : Exception
+{
+    public string asset { get; set; }
+
+    public AssetIsNullException(string asset) : base("Asset balance is zero.")
+    {
+        this.asset = asset;
+    }
+}

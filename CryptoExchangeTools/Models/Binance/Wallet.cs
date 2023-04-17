@@ -15,22 +15,22 @@ public class AssetDetail
     /// <summary>
     /// min withdraw amount
     /// </summary>
-    public required decimal minWithdrawAmount { get; set; }
+    public decimal minWithdrawAmount { get; set; }
 
     /// <summary>
     /// deposit status (false if ALL of networks' are false)
     /// </summary>
-    public required bool depositStatus { get; set; }
+    public bool depositStatus { get; set; }
 
     /// <summary>
     /// withdraw fee
     /// </summary>
-    public required decimal withdrawFee { get; set; }
+    public decimal withdrawFee { get; set; }
 
     /// <summary>
     /// withdraw status (false if ALL of networks' are false)
     /// </summary>
-    public required bool withdrawStatus { get; set; }
+    public bool withdrawStatus { get; set; }
 
     /// <summary>
     /// reason
@@ -55,16 +55,16 @@ public class CoinInformation
         this.networkList = networkList;
     }
 
-    public required string coin { get; set; }
-    public required bool depositAllEnable { get; set; }
-    public required decimal free { get; set; }
-    public required decimal freeze { get; set; }
-    public required decimal ipoable { get; set; }
-    public required decimal ipoing { get; set; }
-    public required bool isLegalMoney { get; set; }
-    public required decimal locked { get; set; }
-    public required string name { get; set; }
-    public required List<Network> networkList { get; set; }
+    public string coin { get; set; }
+    public bool depositAllEnable { get; set; }
+    public decimal free { get; set; }
+    public decimal freeze { get; set; }
+    public decimal ipoable { get; set; }
+    public decimal ipoing { get; set; }
+    public bool isLegalMoney { get; set; }
+    public decimal locked { get; set; }
+    public string name { get; set; }
+    public List<Network> networkList { get; set; }
 
     public class Network
     {
@@ -93,43 +93,43 @@ public class CoinInformation
             this.busy = busy;
         }
 
-        public required string addressRegex { get; set; }
-        public required string coin { get; set; }
+        public string addressRegex { get; set; }
+        public string coin { get; set; }
 
         /// <summary>
         /// shown only when "depositEnable" is false.
         /// </summary>
         public string? depositDesc { get; set; }
-        public required bool depositEnable { get; set; }
-        public required bool isDefault { get; set; }
-        public required string memoRegex { get; set; }
+        public bool depositEnable { get; set; }
+        public bool isDefault { get; set; }
+        public string memoRegex { get; set; }
 
         /// <summary>
         /// min number for balance confirmation
         /// </summary>
-        public required int minConfirm { get; set; }
-        public required string name { get; set; }
-        public required string network { get; set; }
-        public required bool resetAddressStatus { get; set; }
-        public required string specialTips { get; set; }
+        public int minConfirm { get; set; }
+        public string name { get; set; }
+        public string network { get; set; }
+        public bool resetAddressStatus { get; set; }
+        public string specialTips { get; set; }
 
         /// <summary>
         /// confirmation number for balance unlock 
         /// </summary>
-        public required int unLockConfirm { get; set; }
+        public int unLockConfirm { get; set; }
         public string? withdrawDesc { get; set; }
-        public required bool withdrawEnable { get; set; }
-        public required decimal withdrawFee { get; set; }
-        public required decimal withdrawIntegerMultiple { get; set; }
-        public required decimal withdrawMax { get; set; }
-        public required decimal withdrawMin { get; set; }
+        public bool withdrawEnable { get; set; }
+        public decimal withdrawFee { get; set; }
+        public decimal withdrawIntegerMultiple { get; set; }
+        public decimal withdrawMax { get; set; }
+        public decimal withdrawMin { get; set; }
 
         /// <summary>
         /// If the coin needs to provide memo to withdraw
         /// </summary>
-        public required bool sameAddress { get; set; }
-        public required decimal estimatedArrivalTime { get; set; }
-        public required bool busy { get; set; }
+        public bool sameAddress { get; set; }
+        public decimal estimatedArrivalTime { get; set; }
+        public bool busy { get; set; }
     }
 
     public class WithdrawHistoryRecord
@@ -157,36 +157,36 @@ public class CoinInformation
         /// <summary>
         /// Withdrawal id in Binance
         /// </summary>
-        public required string id { get; set; }
+        public string id { get; set; }
 
         /// <summary>
         /// withdrawal amount
         /// </summary>
-        public required decimal amount { get; set; }
+        public decimal amount { get; set; }
 
         /// <summary>
         /// transaction fee
         /// </summary>
-        public required decimal transactionFee { get; set; }
-        public required string coin { get; set; }
-        public required WithdrawStatus status { get; set; }
-        public required string address { get; set; }
+        public decimal transactionFee { get; set; }
+        public string coin { get; set; }
+        public WithdrawStatus status { get; set; }
+        public string address { get; set; }
 
         /// <summary>
         /// withdrawal transaction id
         /// </summary>
-        public required string txId { get; set; }
+        public string txId { get; set; }
 
         /// <summary>
         /// UTC time
         /// </summary>
-        public required string applyTime { get; set; }
-        public required string network { get; set; }
+        public string applyTime { get; set; }
+        public string network { get; set; }
 
         /// <summary>
         /// 1 for internal transfer, 0 for external transfer
         /// </summary>
-        public required int transferType { get; set; }
+        public int transferType { get; set; }
 
         /// <summary>
         /// will not be returned if there's no withdrawOrderId for this withdraw.
@@ -201,12 +201,12 @@ public class CoinInformation
         /// <summary>
         /// confirm times for withdraw
         /// </summary>
-        public required int confirmNo { get; set; }
+        public int confirmNo { get; set; }
 
         /// <summary>
         /// 1: Funding Wallet 0:Spot Wallet
         /// </summary>
-        public required int walletType { get; set; }
+        public int walletType { get; set; }
         public string? txKey { get; set; }
 
         /// <summary>
@@ -227,3 +227,66 @@ public class CoinInformation
     }
 }
 
+public class UserAsset
+{
+    public UserAsset(string asset, string free, string freeze, string withdrawing, string ipoable, string btcValuation)
+    {
+        this.asset = asset;
+        this.free = decimal.Parse(free);
+        this.freeze = decimal.Parse(freeze);
+        this.withdrawing = decimal.Parse(withdrawing);
+        this.ipoable = decimal.Parse(ipoable);
+        this.btcValuation = decimal.Parse(btcValuation);
+    }
+
+    public string asset { get; set; }
+    public decimal free { get; set; }
+    public decimal freeze { get; set; }
+    public decimal withdrawing { get; set; }
+    public decimal ipoable { get; set; }
+    public decimal btcValuation { get; set; }
+}
+
+
+public class DepositHistory
+{
+    public DepositHistory(string id, string amount, string coin, string network, int status, string address, string addressTag, string txId, long insertTime, int transferType, string confirmTimes, int unlockConfirm, int walletType)
+    {
+        this.id = long.Parse(id);
+        this.amount = decimal.Parse(amount);
+        this.coin = coin;
+        this.network = network;
+        this.status = (DepositStatus)status;
+        this.address = address;
+        this.addressTag = addressTag;
+        this.txId = txId;
+        this.insertTime = insertTime;
+        this.transferType = transferType;
+        this.confirmTimes = confirmTimes;
+        this.unlockConfirm = unlockConfirm;
+        this.walletType = walletType;
+    }
+
+    public long id { get; set; }
+    public decimal amount { get; set; }
+    public string coin { get; set; }
+    public string network { get; set; }
+    public DepositStatus status { get; set; }
+    public string address { get; set; }
+    public string addressTag { get; set; }
+    public string txId { get; set; }
+    public long insertTime { get; set; }
+    public int transferType { get; set; }
+    public string confirmTimes { get; set; }
+    public int unlockConfirm { get; set; }
+    public int walletType { get; set; }
+
+    public enum DepositStatus
+    {
+        pending = 0,
+        success = 1,
+        creditedButCannotWithdraw = 6,
+        WrongDeposit = 7,
+        WaitingUserConfirm = 8
+    }
+}
