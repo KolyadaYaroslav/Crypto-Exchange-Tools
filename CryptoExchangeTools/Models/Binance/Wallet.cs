@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Globalization;
+
 namespace CryptoExchangeTools.Models.Binance.Wallet;
 
 public class AssetDetail
 {
+
     public AssetDetail(string minWithdrawAmount, bool depositStatus, string withdrawFee, bool withdrawStatus, string? depositTip)
     {
+        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
+
         this.minWithdrawAmount = decimal.Parse(minWithdrawAmount);
         this.depositStatus = depositStatus;
         this.withdrawFee = decimal.Parse(withdrawFee);
@@ -43,6 +48,8 @@ public class CoinInformation
 {
     public CoinInformation(string coin, bool depositAllEnable, string free, string freeze, string ipoable, string ipoing, bool isLegalMoney, string locked, string name, List<Network> networkList)
     {
+        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
+
         this.coin = coin;
         this.depositAllEnable = depositAllEnable;
         this.free = decimal.Parse(free);
@@ -70,6 +77,8 @@ public class CoinInformation
     {
         public Network(string addressRegex, string coin, string? depositDesc, bool depositEnable, bool isDefault, string memoRegex, int minConfirm, string name, string network, bool resetAddressStatus, string specialTips, int unLockConfirm, string? withdrawDesc, bool withdrawEnable, string withdrawFee, string withdrawIntegerMultiple, string withdrawMax, string withdrawMin, bool sameAddress, string estimatedArrivalTime, bool busy)
         {
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
+
             this.addressRegex = addressRegex;
             this.coin = coin;
             this.depositDesc = depositDesc;
@@ -136,6 +145,8 @@ public class CoinInformation
     {
         public WithdrawHistoryRecord(string id, string amount, string transactionFee, string coin, int status, string address, string txId, string applyTime, string network, int transferType, string? withdrawOrderId, string? info, int confirmNo, int walletType, string? txKey, string? completeTime)
         {
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
+
             this.id = id;
             this.amount = decimal.Parse(amount);
             this.transactionFee = decimal.Parse(transactionFee);
@@ -231,6 +242,8 @@ public class UserAsset
 {
     public UserAsset(string asset, string free, string freeze, string withdrawing, string ipoable, string btcValuation)
     {
+        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
+
         this.asset = asset;
         this.free = decimal.Parse(free);
         this.freeze = decimal.Parse(freeze);
@@ -252,6 +265,8 @@ public class DepositHistory
 {
     public DepositHistory(string id, string amount, string coin, string network, int status, string address, string addressTag, string txId, long insertTime, int transferType, string confirmTimes, int unlockConfirm, int walletType)
     {
+        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-US");
+
         this.id = long.Parse(id);
         this.amount = decimal.Parse(amount);
         this.coin = coin;
