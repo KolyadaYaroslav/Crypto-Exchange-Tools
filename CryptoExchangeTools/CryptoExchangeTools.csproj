@@ -12,12 +12,24 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Models\" />
-    <None Remove="BinanceRequests\" />
     <None Remove="Models\Binance\" />
+    <None Remove="Models\Okx\" />
+    <None Remove="Models\GateIo\" />
+    <None Remove="Models\ICex\" />
+    <None Remove="Requests\" />
+    <None Remove="Requests\OkxRequests\" />
+    <None Remove="Requests\BinanceRequests\" />
+    <None Remove="Requests\GateIoRequests\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
-    <Folder Include="BinanceRequests\" />
     <Folder Include="Models\Binance\" />
+    <Folder Include="Models\Okx\" />
+    <Folder Include="Models\GateIo\" />
+    <Folder Include="Models\ICex\" />
+    <Folder Include="Requests\" />
+    <Folder Include="Requests\OkxRequests\" />
+    <Folder Include="Requests\BinanceRequests\" />
+    <Folder Include="Requests\GateIoRequests\" />
   </ItemGroup>
 </Project>

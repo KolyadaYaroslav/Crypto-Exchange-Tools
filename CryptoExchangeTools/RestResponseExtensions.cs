@@ -12,7 +12,7 @@ internal static class RestResponseExtension
             throw new RequestNotSuccessfulException(response.Request.Resource, response.StatusCode, response.Content);
 
         T data = JsonConvert.DeserializeObject<T>(response.Content)
-            ?? throw new ArgumentNullException("assetInfo", "parameter was null after deserialization");
+            ?? throw new ArgumentNullException(nameof(T), "parameter was null after deserialization");
 
         return data;
     }

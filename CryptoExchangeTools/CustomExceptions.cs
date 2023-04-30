@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Security.Cryptography;
-using static CryptoExchangeTools.Models.Binance.Wallet.CoinInformation.WithdrawHistoryRecord;
+using static CryptoExchangeTools.Models.Binance.Wallet.WithdrawHistoryRecord;
 
 namespace CryptoExchangeTools;
 
@@ -46,9 +46,9 @@ public class RequestNotSuccessfulException : Exception
 public class WithdrawalFailedException : Exception
 {
     public string id { get; set; }
-    public WithdrawStatus Status { get; set; }
+    public string Status { get; set; }
 
-    public WithdrawalFailedException(string id, WithdrawStatus status) : base("Withdraw has failed.")
+    public WithdrawalFailedException(string id, string status) : base("Withdraw has failed.")
     {
         this.id = id;
         Status = status;

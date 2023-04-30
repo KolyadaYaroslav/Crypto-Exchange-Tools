@@ -3,13 +3,16 @@ using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json.Linq;
 using RestSharp;
-using CryptoExchangeTools.BinanceRequests.Wallet;
+using CryptoExchangeTools.Requests.BinanceRequests;
+using CryptoExchangeTools.Models.ICex;
 
 namespace CryptoExchangeTools;
 
 public class BinanceClient : CexClient
 {
 	private const string Url = "https://api.binance.com";
+
+    public Wallet Wallet { get; }
 
     /// <summary>
     /// Initializes a client with account information and checks connection to servers.
@@ -19,32 +22,26 @@ public class BinanceClient : CexClient
     /// <param name="proxy">Proxy to be used with client</param>
     public BinanceClient(string apiKey, string apiSecret, WebProxy? proxy = null) : base(apiKey, apiSecret, Url, proxy)
     {
+        Wallet = new(this);
     }
 
     protected sealed override void TryLogin()
     {
-        Message("Checking Server.");
-
         var request = new RestRequest("sapi/v1/system/status");
-        var response = restClient.ExecuteGet(request);
+
+        var response = ExecuteRequestWithoutResponse(request, false);
 
         if (!response.IsSuccessful)
             throw new ConnectionNotSetException("Couldn't connect to Binance Server.", response.StatusCode, response.Content);
-
-        Message("Server OK.");
 
         CheckAccountStatus();
     }
 
     private void CheckAccountStatus()
     {
-        Message("Checking Account status.");
-
         var request = new RestRequest("sapi/v1/account/status");
 
-        SignRequest(request);
-
-        var response = restClient.ExecuteGet(request);
+        var response = ExecuteRequestWithoutResponse(request);
 
         if (!response.IsSuccessful || response.Content is null)
             throw new BadAccountStatusException("Couldn't connect to Binance Account.", response.StatusCode, response.Content);
@@ -52,16 +49,19 @@ public class BinanceClient : CexClient
         dynamic json = JObject.Parse(response.Content);
         if (json["data"] != "Normal")
             throw new BadAccountStatusException("Couldn't connect to Binance Account.", response.StatusCode, response.Content);
-
-        Message("Account status OK.");
     }
 
-    internal void SignRequest(RestRequest request)
+    internal sealed override void SignRequest(RestRequest request)
     {
         request.AddHeader("X-MBX-APIKEY", ApiKey);
         request.AddParameter("timestamp", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
-        var signature = Sign(request.GetQueryString());
+        var queryString = request.GetQueryString();
+
+        if (string.IsNullOrEmpty(queryString))
+            return;
+
+        var signature = Sign(queryString);
 
         request.AddParameter("signature", signature);
     }
@@ -79,16 +79,58 @@ public class BinanceClient : CexClient
         }
     }
 
-    internal sealed override string CustomWithdraw(
-        string coin, decimal amount, string address, string network, string? addressTag = null, int walletType = -1)
+    public sealed override WithdrawalRecord Withdraw(string currency, decimal amount, string address, string network, bool waitForApprove = true)
     {
-        return this.WithdrawAndWaitForSent(coin, amount, address, network, addressTag, walletType);
+        if(waitForApprove)
+        {
+            var id = this.Wallet.WithdrawCurrency(currency, amount, address, network);
+
+            return new WithdrawalRecord
+            {
+                TxId = id,
+                RequestedAmount = amount,
+                WaitedForApproval = waitForApprove,
+            };
+        }
+        else
+        {
+            (var id, var hash) = this.Wallet.WithdrawAndWaitForSent(currency, amount, address, network);
+
+            return new WithdrawalRecord
+            {
+                TxId = id,
+                RequestedAmount = amount,
+                WaitedForApproval = waitForApprove,
+                TxHash = hash
+            };
+        }
     }
 
-    internal sealed override async Task<string> CustomWithdrawAsync(
-        string coin, decimal amount, string address, string network, string? addressTag = null, int walletType = -1)
+    public async sealed override Task<WithdrawalRecord> WithdrawAsync(string currency, decimal amount, string address, string network, bool waitForApprove = true)
     {
-        return await this.WithdrawAndWaitForSentAsync(coin, amount, address, network, addressTag, walletType);
+        if (waitForApprove)
+        {
+            var id = await this.Wallet.WithdrawCurrencyAsync(currency, amount, address, network);
+
+            return new WithdrawalRecord
+            {
+                TxId = id,
+                RequestedAmount = amount,
+                WaitedForApproval = waitForApprove,
+            };
+        }
+        else
+        {
+            (var id, var hash) = await this.Wallet.WithdrawAndWaitForSentAsync(currency, amount, address, network);
+
+            return new WithdrawalRecord
+            {
+                TxId = id,
+                RequestedAmount = amount,
+                WaitedForApproval = waitForApprove,
+                TxHash = hash
+            };
+        }
     }
 
     internal sealed override decimal CustomReceive(string hash, int timeoutMin = 3600)
@@ -97,12 +139,12 @@ public class BinanceClient : CexClient
 
         while (attempts < timeoutMin)
         {
-            var history = this.GetDepositHistory(txId: hash);
+            var history = this.Wallet.GetDepositHistory(txId: hash);
 
             if (history.Any())
             {
-                Message($"Received {history.Single().amount} {history.Single().coin}");
-                return history.Single().amount;
+                Message($"Received {history.Single().Amount} {history.Single().Coin}");
+                return history.Single().Amount;
             }
 
             Message("Waiting Receive.");
@@ -121,12 +163,12 @@ public class BinanceClient : CexClient
 
         while(attempts < timeoutMin)
         {
-            var history = await this.GetDepositHistoryAsync(txId: hash);
+            var history = await this.Wallet.GetDepositHistoryAsync(txId: hash);
 
             if (history.Any())
             {
-                Message($"Received {history.Single().amount} {history.Single().coin}");
-                return history.Single().amount;
+                Message($"Received {history.Single().Amount} {history.Single().Coin}");
+                return history.Single().Amount;
             }
 
             Message("Waiting Receive.");

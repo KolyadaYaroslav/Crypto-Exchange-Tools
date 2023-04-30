@@ -7,12 +7,12 @@ namespace CryptoExchangeTools;
 
 internal static class RequestExtensionMethods
 {
-    internal static string GetQueryString(this RestRequest request)
+    internal static string? GetQueryString(this RestRequest request)
     {
         var queryParams = request.Parameters.Where(x => x.Type == ParameterType.GetOrPost);
 
         if (!queryParams.Any())
-            throw new Exception("No payload to sign transaction.");
+            return null;
 
         var queryString = new StringBuilder();
 
