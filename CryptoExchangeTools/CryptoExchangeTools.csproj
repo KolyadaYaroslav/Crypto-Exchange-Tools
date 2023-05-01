@@ -20,6 +20,8 @@
     <None Remove="Requests\OkxRequests\" />
     <None Remove="Requests\BinanceRequests\" />
     <None Remove="Requests\GateIoRequests\" />
+    <None Remove="Requests\KucoinRequests\" />
+    <None Remove="Models\Kucoin\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
@@ -31,5 +33,7 @@
     <Folder Include="Requests\OkxRequests\" />
     <Folder Include="Requests\BinanceRequests\" />
     <Folder Include="Requests\GateIoRequests\" />
+    <Folder Include="Requests\KucoinRequests\" />
+    <Folder Include="Models\Kucoin\" />
   </ItemGroup>
 </Project>

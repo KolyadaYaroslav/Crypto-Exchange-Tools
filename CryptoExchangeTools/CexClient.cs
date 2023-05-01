@@ -1,21 +1,18 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using CryptoExchangeTools.Models.ICex;
 using RestSharp;
 
 namespace CryptoExchangeTools;
 
-public abstract class CexClient : ICexClient, IDisposable
+public abstract class CexClient : ICexClient
 {
-    public Guid Guid = Guid.NewGuid();
-
-    private string Url;
+    private string url;
 
     protected readonly string ApiKey;
     protected readonly string ApiSecret;
     protected readonly string? PassPhrase;
 
-    public WebProxy? Proxy;
+    private WebProxy? proxy;
 
     private RestClient restClient;
 
@@ -28,10 +25,10 @@ public abstract class CexClient : ICexClient, IDisposable
 
     public CexClient(string apiKey, string apiSecret, string url, WebProxy? proxy)
     {
-        Url = url;
+        this.url = url;
         ApiKey = apiKey;
         ApiSecret = apiSecret;
-        Proxy = proxy;
+        this.proxy = proxy;
 
         restClient = CreateRestClient();
 
@@ -40,11 +37,11 @@ public abstract class CexClient : ICexClient, IDisposable
 
     public CexClient(string apiKey, string apiSecret, string passPhrase, string url, WebProxy? proxy)
     {
-        Url = url;
+        this.url = url;
         ApiKey = apiKey;
         ApiSecret = apiSecret;
         PassPhrase = passPhrase;
-        Proxy = proxy;
+        this.proxy = proxy;
 
         restClient = CreateRestClient();
 
@@ -55,21 +52,23 @@ public abstract class CexClient : ICexClient, IDisposable
     {
         var restOptions = new RestClientOptions()
         {
-            BaseUrl = new Uri(Url),
-            Proxy = Proxy
+            BaseUrl = new Uri(url),
+            Proxy = proxy
         };
 
         return new RestClient(restOptions);
     }
 
-    protected abstract void TryLogin();
+    protected virtual void TryLogin()
+    {
+    }
 
     public virtual void ChangeProxy(WebProxy? proxy)
     {
         var restOptions = new RestClientOptions()
         {
-            BaseUrl = new Uri(Url),
-            Proxy = Proxy
+            BaseUrl = new Uri(url),
+            Proxy = proxy
         };
 
         restClient = new RestClient(restOptions);
@@ -124,9 +123,9 @@ public abstract class CexClient : ICexClient, IDisposable
     public abstract Task<WithdrawalRecord> WithdrawAsync(string currency, decimal amount, string address, string network, bool waitForApprove = true);
 
 
-    internal abstract decimal CustomReceive(string hash, int timeoutMin = 3600);
+    public abstract decimal CustomReceive(string hash, int timeoutMin = 3600);
 
-    internal abstract Task<decimal> CustomReceiveAsync(string hash, int timeoutMin = 3600);
+    public abstract Task<decimal> CustomReceiveAsync(string hash, int timeoutMin = 3600);
 
 
 

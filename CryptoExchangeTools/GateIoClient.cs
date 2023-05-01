@@ -7,15 +7,17 @@ using RestSharp;
 
 namespace CryptoExchangeTools;
 
-public partial class GateIoClient : CexClient
+public class GateIoClient : CexClient
 {
-    private const string Url = "https://api.gateio.ws";
+    #region Initialize
+
+    private const string url = "https://api.gateio.ws";
 
     public Wallet Wallet { get; }
 
     public Withdrawal Withdrawal { get; }
 
-    public GateIoClient(string apiKey, string apiSecret, WebProxy? proxy = null) : base(apiKey, apiSecret, Url, proxy)
+    public GateIoClient(string apiKey, string apiSecret, WebProxy? proxy = null) : base(apiKey, apiSecret, url, proxy)
     {
         Wallet = new Wallet(this);
         Withdrawal = new Withdrawal(this);
@@ -30,12 +32,16 @@ public partial class GateIoClient : CexClient
             throw new ConnectionNotSetException("Couldn't connect to GateIo Server.", response.StatusCode, response.Content);
     }
 
+    #endregion Initialize
+
+    #region Signature
+
     internal sealed override void SignRequest(RestRequest request)
     {
         var ts = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
         request.AddHeader("KEY", ApiKey);
-        request.AddHeader("Timestamp", ts);
+        request.AddHeader("Timestamp", ts.ToString());
         request.AddHeader("SIGN", Sign(request, ts));
     }
 
@@ -50,48 +56,104 @@ public partial class GateIoClient : CexClient
             byte[] payloadBytes = Encoding.UTF8.GetBytes(preHashString);
             byte[] hash = hmacsha512.ComputeHash(payloadBytes);
 
-            return System.Convert.ToHexString(hash);
+            return System.Convert.ToHexString(hash).ToLower();
         }
     }
 
     private static string BuildPreHashString(RestRequest request, long ts)
     {
-        var method = request.Method.ToString().ToUpper();
+        string method = request.Method.ToString().ToUpper();
 
-        var queryString = request.GetQueryString();
-        var path = "/" + request.Resource + (!string.IsNullOrEmpty(queryString) ? $"?{queryString}" : null);
+        string path = "/" + request.Resource;
 
+        string queryString = request.GetQueryString() ?? "";
+
+        string bodyHash = HashBody(request);
+
+        return $"{method}\n{path}\n{queryString}\n{bodyHash}\n{ts}";
+    }
+
+    private static string HashBody(RestRequest request)
+    {
         var bodyParams = request.Parameters.Where(x => x.Type == ParameterType.RequestBody);
         var body = bodyParams.Any() ? bodyParams.Single().Value?.ToString() : null;
 
-        string? hashedBody = string.Empty;
-
-        byte[] payloadBytes = Encoding.UTF8.GetBytes(string.IsNullOrEmpty(body) ? "" : body);
+        byte[] payloadBytes = Encoding.UTF8.GetBytes(body ?? "");
         byte[] hash = SHA512.HashData(payloadBytes);
 
-        hashedBody = System.Convert.ToHexString(hash);
-
-        return method + "\n" + path + "\n" + queryString + "\n" + hashedBody + "\n" + ts;
+        return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
     }
+
+    #endregion Signature
+
+    #region Global Methods
 
     public sealed override WithdrawalRecord Withdraw(string currency, decimal amount, string address, string network, bool waitForApprove = true)
     {
-        throw new NotImplementedException();
+        if(!waitForApprove)
+        {
+            var result = Withdrawal.WithdrawCurrency(currency, amount, address, network);
+
+            return new WithdrawalRecord
+            {
+                TxId = result.Id.ToString(),
+                RequestedAmount = amount,
+                WaitedForApproval = waitForApprove,
+                TxHash = result.Txid
+            };
+        }
+        else
+        {
+            var result = Withdrawal.WithdrawAndWaitForSent(currency, amount, address, network);
+
+            return new WithdrawalRecord
+            {
+                TxId = result.Id.ToString(),
+                RequestedAmount = amount,
+                WaitedForApproval = waitForApprove,
+                TxHash = result.Txid
+            };
+        }
     }
 
     public async sealed override Task<WithdrawalRecord> WithdrawAsync(string currency, decimal amount, string address, string network, bool waitForApprove = true)
     {
-        throw new NotImplementedException();
+        if (!waitForApprove)
+        {
+            var result = await Withdrawal.WithdrawCurrencyAsync(currency, amount, address, network);
+
+            return new WithdrawalRecord
+            {
+                TxId = result.Id.ToString(),
+                RequestedAmount = amount,
+                WaitedForApproval = waitForApprove,
+                TxHash = result.Txid
+            };
+        }
+        else
+        {
+            var result = await Withdrawal.WithdrawAndWaitForSentAsync(currency, amount, address, network);
+
+            return new WithdrawalRecord
+            {
+                TxId = result.Id.ToString(),
+                RequestedAmount = amount,
+                WaitedForApproval = waitForApprove,
+                TxHash = result.Txid
+            };
+        }
     }
 
-    internal sealed override decimal CustomReceive(string hash, int timeoutMin = 3600)
+    public sealed override decimal CustomReceive(string hash, int timeoutMin = 3600)
     {
         throw new NotImplementedException();
     }
 
-    internal sealed override async Task<decimal> CustomReceiveAsync(string hash, int timeoutMin = 3600)
+    public sealed override async Task<decimal> CustomReceiveAsync(string hash, int timeoutMin = 3600)
     {
         throw new NotImplementedException();
     }
+
+    #endregion Global Methods
 }
 

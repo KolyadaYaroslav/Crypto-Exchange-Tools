@@ -99,7 +99,6 @@ public class Withdrawal
     /// <summary>
     /// Request withdrawal and wait untill assets leave GateIo.
     /// </summary>
-    /// <param name="Client"></param>
     /// <param name="currency">Currency name.</param>
     /// <param name="amount">Currency amount.</param>
     /// <param name="address">Withdrawal address. Required for withdrawals.</param>
@@ -130,7 +129,7 @@ public class Withdrawal
             {
                 var txData = history.Where(x => x.Id == withdrawalResult.Id).Single();
 
-                if (CheckHistory(Client, txData))
+                if (CheckHistory(txData))
                     return txData;
             }
 
@@ -142,7 +141,6 @@ public class Withdrawal
     /// <summary>
     /// Request withdrawal and wait untill assets leave GateIo.
     /// </summary>
-    /// <param name="Client"></param>
     /// <param name="currency">Currency name.</param>
     /// <param name="amount">Currency amount.</param>
     /// <param name="address">Withdrawal address. Required for withdrawals.</param>
@@ -173,7 +171,7 @@ public class Withdrawal
             {
                 var txData = history.Where(x => x.Id == withdrawalResult.Id).Single();
 
-                if (CheckHistory(Client, txData))
+                if (CheckHistory(txData))
                     return txData;
             }
 
@@ -182,7 +180,7 @@ public class Withdrawal
         }
     }
 
-    private static bool CheckHistory(GateIoClient Client, WithdrawHistory txData)
+    private bool CheckHistory(WithdrawHistory txData)
     {
         Client.Message(txData.Status.ToString());
 

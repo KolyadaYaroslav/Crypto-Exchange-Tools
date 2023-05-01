@@ -3,7 +3,7 @@ using CryptoExchangeTools.Models.ICex;
 
 namespace CryptoExchangeTools;
 
-public interface ICexClient
+public interface ICexClient : IDisposable
 {
     /// <summary>
     /// Request withdrawal from exchange.
@@ -25,5 +25,7 @@ public interface ICexClient
     /// <param name="network">Network name, ubject to exchange formating.</param>
     /// /// <param name="waitForApprove">Set to false not to wait for approval from exchange.</param>
     Task<WithdrawalRecord> WithdrawAsync(string currency, decimal amount, string address, string network, bool waitForApprove = true);
+
+    new void Dispose();
 }
 

@@ -16,7 +16,7 @@ public class Wallet
 
     #region Original Methods
 
-    #region GetChainsSupportedForSpecifiedCurrency
+    #region Get Chains Supported For Specified Currency
 
     /// <summary>
     /// List chains supported for specified currency.
@@ -51,9 +51,9 @@ public class Wallet
         return request;
     }
 
-    #endregion GetChainsSupportedForSpecifiedCurrency
+    #endregion Get Chains Supported For Specified Currency
 
-    #region GenerateCurrencyDepositAddress
+    #region Generate Currency Deposit Address
 
     /// <summary>
     /// Generate currency deposit address.
@@ -88,9 +88,9 @@ public class Wallet
         return request;
     }
 
-    #endregion GenerateCurrencyDepositAddress
+    #endregion Generate Currency Deposit Address
 
-    #region RetrieveWithdrawalRecords
+    #region Retrieve Withdrawal Records
 
     /// <summary>
     /// Retrieve withdrawal records.
@@ -161,9 +161,9 @@ public class Wallet
         return request;
     }
 
-    #endregion RetrieveWithdrawalRecords
+    #endregion Retrieve Withdrawal Records
 
-    #region GetUserTotalBalances
+    #region Get User Total Balances
 
     /// <summary>
     /// This endpoint returns an approximate sum of exchanged amount from all currencies to input currency for each account.The exchange rate and account balance could have been cached for at most 1 minute. It is not recommended to use its result for any trading calculation.
@@ -204,9 +204,9 @@ public class Wallet
         return request;
     }
 
-    #endregion GetUserTotalBalances
+    #endregion Get User Total Balances
 
-    #region GetSpotBalances
+    #region Get Spot Balances
 
     /// <summary>
     /// List spot accounts.
@@ -242,7 +242,7 @@ public class Wallet
         return request;
     }
 
-    #endregion GetSpotBalances
+    #endregion Get Spot Balances
 
     #endregion Original Methods
 }

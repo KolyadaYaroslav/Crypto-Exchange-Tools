@@ -85,12 +85,12 @@ public class OkxClient : CexClient
         throw new NotImplementedException();
     }
 
-    internal sealed override decimal CustomReceive(string hash, int timeoutMin = 3600)
+    public sealed override decimal CustomReceive(string hash, int timeoutMin = 3600)
     {
         throw new NotImplementedException();
     }
 
-    internal sealed override async Task<decimal> CustomReceiveAsync(string hash, int timeoutMin = 3600)
+    public sealed override async Task<decimal> CustomReceiveAsync(string hash, int timeoutMin = 3600)
     {
         throw new NotImplementedException();
     }

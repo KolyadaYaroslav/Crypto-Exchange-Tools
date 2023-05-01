@@ -81,7 +81,7 @@ public class BinanceClient : CexClient
 
     public sealed override WithdrawalRecord Withdraw(string currency, decimal amount, string address, string network, bool waitForApprove = true)
     {
-        if(waitForApprove)
+        if(!waitForApprove)
         {
             var id = this.Wallet.WithdrawCurrency(currency, amount, address, network);
 
@@ -108,7 +108,7 @@ public class BinanceClient : CexClient
 
     public async sealed override Task<WithdrawalRecord> WithdrawAsync(string currency, decimal amount, string address, string network, bool waitForApprove = true)
     {
-        if (waitForApprove)
+        if (!waitForApprove)
         {
             var id = await this.Wallet.WithdrawCurrencyAsync(currency, amount, address, network);
 
@@ -133,7 +133,7 @@ public class BinanceClient : CexClient
         }
     }
 
-    internal sealed override decimal CustomReceive(string hash, int timeoutMin = 3600)
+    public sealed override decimal CustomReceive(string hash, int timeoutMin = 3600)
     {
         var attempts = 0;
 
@@ -157,7 +157,7 @@ public class BinanceClient : CexClient
         throw new TimeoutException("Timeout recahed while waiting for receiving");
     }
 
-    internal sealed override async Task<decimal> CustomReceiveAsync(string hash, int timeoutMin = 3600)
+    public sealed override async Task<decimal> CustomReceiveAsync(string hash, int timeoutMin = 3600)
     {
         var attempts = 0;
 
