@@ -26,6 +26,12 @@ public interface ICexClient : IDisposable
     /// /// <param name="waitForApprove">Set to false not to wait for approval from exchange.</param>
     Task<WithdrawalRecord> WithdrawAsync(string currency, decimal amount, string address, string network, bool waitForApprove = true);
 
+
+    /// <summary>
+    /// Invokes when client emits a message. E.g. Withdrawal status change.
+    /// </summary>
+    event EventHandler<string>? OnMessage;
+
     new void Dispose();
 }
 

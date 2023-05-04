@@ -22,6 +22,8 @@
     <None Remove="Requests\GateIoRequests\" />
     <None Remove="Requests\KucoinRequests\" />
     <None Remove="Models\Kucoin\" />
+    <None Remove="Exceptions.cs\" />
+    <None Remove="Exceptions.cs\Kucoin\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
@@ -35,5 +37,7 @@
     <Folder Include="Requests\GateIoRequests\" />
     <Folder Include="Requests\KucoinRequests\" />
     <Folder Include="Models\Kucoin\" />
+    <Folder Include="Exceptions.cs\" />
+    <Folder Include="Exceptions.cs\Kucoin\" />
   </ItemGroup>
 </Project>

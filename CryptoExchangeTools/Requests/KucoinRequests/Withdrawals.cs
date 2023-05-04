@@ -201,19 +201,21 @@ public class Withdrawals
         int limit = 500;
         while(true)
         {
+            Thread.Sleep(10_000);
+
             if (limit == 0)
                 throw new Exception("Timeout for awaiting transaction completion was hit");
 
             var history = Client.Withdrawals.GetWithdrawalsList(currency);
 
-            if(history.Items.Any())
+
+            if (history.Items.Any())
             {
                 var txData = history.Items.Where(x => x.Id == withdrwal.WithdrawalId).Single();
 
                 if (CheckHistory(txData))
                     return txData;
             }
-            Thread.Sleep(10_000);
             limit--;
         }
     }
@@ -248,6 +250,8 @@ public class Withdrawals
         int limit = 500;
         while (true)
         {
+            await Task.Delay(10_000);
+
             if (limit == 0)
                 throw new Exception("Timeout for awaiting transaction completion was hit");
 
@@ -260,7 +264,6 @@ public class Withdrawals
                 if (CheckHistory(txData))
                     return txData;
             }
-            Thread.Sleep(10_000);
             limit--;
         }
     }

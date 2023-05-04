@@ -1,6 +1,7 @@
 ﻿using CryptoExchangeTools.Models.ICex;
 using CryptoExchangeTools.Models.Kucoin;
 using CryptoExchangeTools.Requests.KucoinRequests;
+using Newtonsoft.Json;
 using RestSharp;
 using System.Globalization;
 using System.Net;
@@ -129,9 +130,12 @@ public class KucoinClient : CexClient
 
     protected sealed override T DeserializeResponse<T>(RestResponse response)
     {
-        return response
-            .Deserialize<BaseResponse>()
-            .ParseData<T>();
+        var baseResponse = response.Deserialize<BaseResponse>();
+
+        if (baseResponse.Code != 200000)
+            throw new Exception($"[{baseResponse.Code}] {baseResponse.Message}");
+
+        return baseResponse.ParseData<T>();
     }
 
     public sealed override WithdrawalRecord Withdraw(string currency, decimal amount, string address, string network, bool waitForApprove = true)

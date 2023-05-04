@@ -13,6 +13,9 @@ public class BaseResponse
     [JsonProperty("data")]
     public required JToken Data { get; set; }
 
+    [JsonProperty("msg")]
+    public string? Message { get; set; }
+
     public T ParseData<T>()
     {
         if (Data is null)
