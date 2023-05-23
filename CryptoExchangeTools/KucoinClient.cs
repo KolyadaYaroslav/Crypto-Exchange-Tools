@@ -10,7 +10,7 @@ using System.Text;
 
 namespace CryptoExchangeTools;
 
-public class KucoinClient : CexClient
+public class KucoinClient : CexClient, ICexClient
 {
     #region Initialize
 
@@ -138,7 +138,7 @@ public class KucoinClient : CexClient
         return baseResponse.ParseData<T>();
     }
 
-    public sealed override WithdrawalRecord Withdraw(string currency, decimal amount, string address, string network, bool waitForApprove = true)
+    public WithdrawalRecord Withdraw(string currency, decimal amount, string address, string network, bool waitForApprove = true)
     {
         if(waitForApprove)
         {
@@ -165,7 +165,7 @@ public class KucoinClient : CexClient
         }
     }
 
-    public async sealed override Task<WithdrawalRecord> WithdrawAsync(string currency, decimal amount, string address, string network, bool waitForApprove = true)
+    public async Task<WithdrawalRecord> WithdrawAsync(string currency, decimal amount, string address, string network, bool waitForApprove = true)
     {
         if (waitForApprove)
         {
@@ -190,6 +190,34 @@ public class KucoinClient : CexClient
                 TxId = result.WithdrawalId
             };
         }
+    }
+
+    public decimal GetWithdrawalFee(string currency, string network)
+    {
+        var quota = Withdrawals.GetWithdrawalQuotas(currency, network);
+
+        return quota.WithdrawMinFee;
+    }
+
+    public async Task<decimal> GetWithdrawalFeeAsync(string currency, string network)
+    {
+        var quota = await Withdrawals.GetWithdrawalQuotasAsync(currency, network);
+
+        return quota.WithdrawMinFee;
+    }
+
+    public int QueryWithdrawalPrecision(string currency, string network)
+    {
+        var quota = Withdrawals.GetWithdrawalQuotas(currency, network);
+
+        return quota.Precision;
+    }
+
+    public async Task<int> QueryWithdrawalPrecisionAsync(string currency, string network)
+    {
+        var quota = await Withdrawals.GetWithdrawalQuotasAsync(currency, network);
+
+        return quota.Precision;
     }
 
     public sealed override decimal CustomReceive(string hash, int timeoutMin = 3600)

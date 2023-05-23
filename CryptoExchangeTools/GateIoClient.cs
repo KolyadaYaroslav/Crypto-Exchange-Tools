@@ -7,7 +7,7 @@ using RestSharp;
 
 namespace CryptoExchangeTools;
 
-public class GateIoClient : CexClient
+public class GateIoClient : CexClient, ICexClient
 {
     #region Initialize
 
@@ -88,7 +88,7 @@ public class GateIoClient : CexClient
 
     #region Global Methods
 
-    public sealed override WithdrawalRecord Withdraw(string currency, decimal amount, string address, string network, bool waitForApprove = true)
+    public WithdrawalRecord Withdraw(string currency, decimal amount, string address, string network, bool waitForApprove = true)
     {
         if(!waitForApprove)
         {
@@ -116,7 +116,7 @@ public class GateIoClient : CexClient
         }
     }
 
-    public async sealed override Task<WithdrawalRecord> WithdrawAsync(string currency, decimal amount, string address, string network, bool waitForApprove = true)
+    public async Task<WithdrawalRecord> WithdrawAsync(string currency, decimal amount, string address, string network, bool waitForApprove = true)
     {
         if (!waitForApprove)
         {
@@ -142,6 +142,26 @@ public class GateIoClient : CexClient
                 TxHash = result.Txid
             };
         }
+    }
+
+    public decimal GetWithdrawalFee(string currency, string network)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<decimal> GetWithdrawalFeeAsync(string currency, string network)
+    {
+        throw new NotImplementedException();
+    }
+
+    public int QueryWithdrawalPrecision(string currency, string network)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<int> QueryWithdrawalPrecisionAsync(string currency, string network)
+    {
+        throw new NotImplementedException();
     }
 
     public sealed override decimal CustomReceive(string hash, int timeoutMin = 3600)

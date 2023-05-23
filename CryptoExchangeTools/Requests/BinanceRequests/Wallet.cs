@@ -516,6 +516,8 @@ public class Wallet
         var limit = 500;
         while (true)
         {
+            Thread.Sleep(10_000);
+
             if (limit == 0)
                 throw new Exception("Timeout for awaiting transaction completion was hit");
 
@@ -535,8 +537,6 @@ public class Wallet
                 || txData.Status == WithdrawStatus.Rejected)
                     throw new WithdrawalFailedException(withdrawalId.ToString(), txData.Status.ToString());
             }
-
-            Thread.Sleep(10_000);
             limit--;
         }
     }
@@ -566,6 +566,8 @@ public class Wallet
         var limit = 500;
         while (true)
         {
+            await Task.Delay(10_000);
+
             if (limit == 0)
                 throw new Exception("Timeout for awaiting transaction completion was hit");
 
@@ -585,8 +587,6 @@ public class Wallet
                 || txData.Status == WithdrawStatus.Rejected)
                     throw new WithdrawalFailedException(txData.Id, txData.Status.ToString());
             }
-
-            await Task.Delay(10_000);
             limit--;
         }
     }

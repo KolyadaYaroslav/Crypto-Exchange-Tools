@@ -17,10 +17,10 @@ internal class WithdrawRequest
 {
     public WithdrawRequest(string currency, string address, decimal amount, string chain, string? memo, bool isInner, string? remark, string? feeDeductType)
     {
-        this.currency = currency;
+        this.currency = currency.ToUpper();
         this.address = address;
         this.amount = amount;
-        this.chain = chain;
+        this.chain = chain.ToLower();
         this.memo = memo;
         this.isInner = isInner;
         this.remark = remark;
@@ -145,4 +145,81 @@ public partial class WithdrawHistory
         SUCCESS,
         FAILURE
     }
+}
+
+
+public partial class WithdrawalQuota
+{
+    /// <summary>
+    /// Currency.
+    /// </summary>
+    [JsonProperty("currency")]
+    public required string Currency { get; set; }
+
+    /// <summary>
+    /// Current available withdrawal amount.
+    /// </summary>
+    [JsonProperty("limitBTCAmount")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal LimitBtcAmount { get; set; }
+
+    /// <summary>
+    /// Remaining amount available to withdraw the current day.
+    /// </summary>
+    [JsonProperty("usedBTCAmount")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal UsedBtcAmount { get; set; }
+
+    /// <summary>
+    /// Minimum withdrawal amount.
+    /// </summary>
+    [JsonProperty("remainAmount")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal RemainAmount { get; set; }
+
+    /// <summary>
+    /// Total BTC amount available to withdraw the current day.
+    /// </summary>
+    [JsonProperty("availableAmount")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal AvailableAmount { get; set; }
+
+    /// <summary>
+    /// Fees for internal withdrawal.
+    /// </summary>
+    [JsonProperty("withdrawMinFee")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal WithdrawMinFee { get; set; }
+
+    /// <summary>
+    /// The estimated BTC amount (based on the daily fiat limit) that can be withdrawn within the current day.
+    /// </summary>
+    [JsonProperty("innerWithdrawMinFee")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal InnerWithdrawMinFee { get; set; }
+
+    /// <summary>
+    /// Is the withdraw function enabled or not.
+    /// </summary>
+    [JsonProperty("withdrawMinSize")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal WithdrawMinSize { get; set; }
+
+    /// <summary>
+    /// Minimum withdrawal fee.
+    /// </summary>
+    [JsonProperty("isWithdrawEnabled")]
+    public bool IsWithdrawEnabled { get; set; }
+
+    /// <summary>
+    /// Floating point precision.
+    /// </summary>
+    [JsonProperty("precision")]
+    public int Precision { get; set; }
+
+    /// <summary>
+    /// The chain name of currency, e.g. The available value for USDT are OMNI, ERC20, TRC20, default is ERC20.
+    /// </summary>
+    [JsonProperty("chain")]
+    public required string Chain { get; set; }
 }

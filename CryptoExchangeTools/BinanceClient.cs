@@ -8,7 +8,7 @@ using CryptoExchangeTools.Models.ICex;
 
 namespace CryptoExchangeTools;
 
-public class BinanceClient : CexClient
+public class BinanceClient : CexClient, ICexClient
 {
 	private const string Url = "https://api.binance.com";
 
@@ -79,7 +79,7 @@ public class BinanceClient : CexClient
         }
     }
 
-    public sealed override WithdrawalRecord Withdraw(string currency, decimal amount, string address, string network, bool waitForApprove = true)
+    public WithdrawalRecord Withdraw(string currency, decimal amount, string address, string network, bool waitForApprove = true)
     {
         if(!waitForApprove)
         {
@@ -106,7 +106,7 @@ public class BinanceClient : CexClient
         }
     }
 
-    public async sealed override Task<WithdrawalRecord> WithdrawAsync(string currency, decimal amount, string address, string network, bool waitForApprove = true)
+    public async Task<WithdrawalRecord> WithdrawAsync(string currency, decimal amount, string address, string network, bool waitForApprove = true)
     {
         if (!waitForApprove)
         {
@@ -131,6 +131,50 @@ public class BinanceClient : CexClient
                 TxHash = hash
             };
         }
+    }
+
+    public decimal GetWithdrawalFee(string currency, string network)
+    {
+        var coinInfo = Wallet.GetCoinInformation(currency, network);
+
+        return coinInfo.NetworkList
+            .Where(x => x.NetworkName.ToLower() == network.ToLower())
+            .First()
+            .WithdrawFee;
+    }
+
+    public async Task<decimal> GetWithdrawalFeeAsync(string currency, string network)
+    {
+        var coinInfo = await Wallet.GetCoinInformationAsync(currency, network);
+
+        return coinInfo.NetworkList
+            .Where(x => x.NetworkName.ToLower() == network.ToLower())
+            .First()
+            .WithdrawFee;
+    }
+
+    public int QueryWithdrawalPrecision(string currency, string network)
+    {
+        var coinInfo = Wallet.GetCoinInformation(currency, network);
+
+        var decimals = coinInfo.NetworkList
+            .Where(x => x.NetworkName.ToLower() == network.ToLower())
+            .First()
+            .WithdrawIntegerMultiple;
+
+        return - (int)Math.Log10((double)decimals);
+    }
+
+    public async Task<int> QueryWithdrawalPrecisionAsync(string currency, string network)
+    {
+        var coinInfo = await Wallet.GetCoinInformationAsync(currency, network);
+
+        var decimals = coinInfo.NetworkList
+            .Where(x => x.NetworkName.ToLower() == network.ToLower())
+            .First()
+            .WithdrawIntegerMultiple;
+
+        return - (int)Math.Log10((double)decimals);
     }
 
     public sealed override decimal CustomReceive(string hash, int timeoutMin = 3600)

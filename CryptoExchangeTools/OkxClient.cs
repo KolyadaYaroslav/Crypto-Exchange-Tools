@@ -9,7 +9,7 @@ using RestSharp;
 
 namespace CryptoExchangeTools;
 
-public class OkxClient : CexClient
+public class OkxClient : CexClient, ICexClient
 {
     private const string Url = "https://www.okx.com";
 
@@ -75,12 +75,32 @@ public class OkxClient : CexClient
             .ParseData<T>();
     }
 
-    public sealed override WithdrawalRecord Withdraw(string currency, decimal amount, string address, string network, bool waitForApprove = true)
+    public WithdrawalRecord Withdraw(string currency, decimal amount, string address, string network, bool waitForApprove = true)
     {
         throw new NotImplementedException();
     }
 
-    public async sealed override Task<WithdrawalRecord> WithdrawAsync(string currency, decimal amount, string address, string network, bool waitForApprove = true)
+    public async Task<WithdrawalRecord> WithdrawAsync(string currency, decimal amount, string address, string network, bool waitForApprove = true)
+    {
+        throw new NotImplementedException();
+    }
+
+    public decimal GetWithdrawalFee(string currency, string network)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<decimal> GetWithdrawalFeeAsync(string currency, string network)
+    {
+        throw new NotImplementedException();
+    }
+
+    public int QueryWithdrawalPrecision(string currency, string network)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<int> QueryWithdrawalPrecisionAsync(string currency, string network)
     {
         throw new NotImplementedException();
     }

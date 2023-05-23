@@ -4,7 +4,7 @@ using RestSharp;
 
 namespace CryptoExchangeTools;
 
-public abstract class CexClient : ICexClient
+public abstract class CexClient
 {
     private string url;
 
@@ -117,17 +117,9 @@ public abstract class CexClient : ICexClient
         return await restClient.ExecuteAsync(request);
     }
 
-
-    public abstract WithdrawalRecord Withdraw(string currency, decimal amount, string address, string network, bool waitForApprove = true);
-
-    public abstract Task<WithdrawalRecord> WithdrawAsync(string currency, decimal amount, string address, string network, bool waitForApprove = true);
-
-
     public abstract decimal CustomReceive(string hash, int timeoutMin = 3600);
 
     public abstract Task<decimal> CustomReceiveAsync(string hash, int timeoutMin = 3600);
-
-
 
     public void Dispose()
     {

@@ -165,6 +165,48 @@ public class Withdrawals
 
     #endregion Get Withdrawals List
 
+    #region Get Withdrawal Quotas
+
+    /// <summary>
+    /// Get Withdrawal quotas for specified currency.
+    /// </summary>
+    /// <param name="currency">Currency.</param>
+    /// <param name="chain">[Optional] The chain of currency. This only apply for multi-chain currency, and there is no need for single chain currency; you can query the chain through the Currencies.GetCurrencyDetail().</param>
+    /// <returns></returns>
+    public WithdrawalQuota GetWithdrawalQuotas(string currency, string? chain = null)
+    {
+        var request = BuildGetWithdrawalQuotas(currency, chain);
+
+        return Client.ExecuteRequest<WithdrawalQuota>(request);
+    }
+
+    /// <summary>
+    /// Get Withdrawal quotas for specified currency.
+    /// </summary>
+    /// <param name="currency">Currency.</param>
+    /// <param name="chain">[Optional] The chain of currency. This only apply for multi-chain currency, and there is no need for single chain currency; you can query the chain through the Currencies.GetCurrencyDetail().</param>
+    /// <returns></returns>
+    public async Task<WithdrawalQuota> GetWithdrawalQuotasAsync(string currency, string? chain = null)
+    {
+        var request = BuildGetWithdrawalQuotas(currency, chain);
+
+        return await Client.ExecuteRequestAsync<WithdrawalQuota>(request);
+    }
+
+    private static RestRequest BuildGetWithdrawalQuotas(string currency, string? chain)
+    {
+        var request = new RestRequest("api/v1/withdrawals/quotas");
+
+        request.AddParameter("currency", currency.ToUpper());
+
+        if (!string.IsNullOrEmpty(chain))
+            request.AddParameter("chain", chain.ToLower());
+
+        return request;
+    }
+
+    #endregion Get Withdrawal Quotas
+
     #endregion Original Methods
 
     #region Derived Methods
