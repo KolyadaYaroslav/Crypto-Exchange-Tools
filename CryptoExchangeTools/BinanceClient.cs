@@ -10,9 +10,19 @@ namespace CryptoExchangeTools;
 
 public class BinanceClient : CexClient, ICexClient
 {
-	private const string Url = "https://api.binance.com";
+    private const string Url = "https://api.binance.com";
 
     public Wallet Wallet { get; }
+
+    public Margin Margin { get; }
+
+    public Trade Trade { get;}
+
+    public Market Market { get; }
+
+    public FuturesTransfer FuturesTransfer { get; }
+
+    public BinanceFuturesClient Futures { get; }
 
     /// <summary>
     /// Initializes a client with account information and checks connection to servers.
@@ -23,6 +33,11 @@ public class BinanceClient : CexClient, ICexClient
     public BinanceClient(string apiKey, string apiSecret, WebProxy? proxy = null) : base(apiKey, apiSecret, Url, proxy)
     {
         Wallet = new(this);
+        Margin = new(this);
+        Trade = new(this);
+        FuturesTransfer = new(this);
+        Market = new(this);
+        Futures = new(apiKey, apiSecret, proxy);
     }
 
     protected sealed override void TryLogin()
@@ -133,7 +148,7 @@ public class BinanceClient : CexClient, ICexClient
         }
     }
 
-    public decimal GetWithdrawalFee(string currency, string network)
+    public sealed override decimal GetWithdrawalFee(string currency, string network)
     {
         var coinInfo = Wallet.GetCoinInformation(currency, network);
 
@@ -143,7 +158,7 @@ public class BinanceClient : CexClient, ICexClient
             .WithdrawFee;
     }
 
-    public async Task<decimal> GetWithdrawalFeeAsync(string currency, string network)
+    public sealed override async Task<decimal> GetWithdrawalFeeAsync(string currency, string network)
     {
         var coinInfo = await Wallet.GetCoinInformationAsync(currency, network);
 
@@ -153,7 +168,7 @@ public class BinanceClient : CexClient, ICexClient
             .WithdrawFee;
     }
 
-    public int QueryWithdrawalPrecision(string currency, string network)
+    public sealed override int QueryWithdrawalPrecision(string currency, string network)
     {
         var coinInfo = Wallet.GetCoinInformation(currency, network);
 
@@ -165,7 +180,7 @@ public class BinanceClient : CexClient, ICexClient
         return - (int)Math.Log10((double)decimals);
     }
 
-    public async Task<int> QueryWithdrawalPrecisionAsync(string currency, string network)
+    public sealed override async Task<int> QueryWithdrawalPrecisionAsync(string currency, string network)
     {
         var coinInfo = await Wallet.GetCoinInformationAsync(currency, network);
 
@@ -177,52 +192,56 @@ public class BinanceClient : CexClient, ICexClient
         return - (int)Math.Log10((double)decimals);
     }
 
-    public sealed override decimal CustomReceive(string hash, int timeoutMin = 3600)
+    public sealed override decimal QueryWithdrawalMinAmount(string currency, string network)
     {
-        var attempts = 0;
+        var data = Wallet.GetCoinInformation(currency, network);
 
-        while (attempts < timeoutMin)
-        {
-            var history = this.Wallet.GetDepositHistory(txId: hash);
-
-            if (history.Any())
-            {
-                Message($"Received {history.Single().Amount} {history.Single().Coin}");
-                return history.Single().Amount;
-            }
-
-            Message("Waiting Receive.");
-
-            attempts += 10;
-
-            Thread.Sleep(10000);
-        }
-
-        throw new TimeoutException("Timeout recahed while waiting for receiving");
+        return data.NetworkList.Single().WithdrawMin;
     }
 
-    public sealed override async Task<decimal> CustomReceiveAsync(string hash, int timeoutMin = 3600)
+    public sealed override async Task<decimal> QueryWithdrawalMinAmountAsync(string currency, string network)
     {
-        var attempts = 0;
+        var data = await Wallet.GetCoinInformationAsync(currency, network);
 
-        while(attempts < timeoutMin)
-        {
-            var history = await this.Wallet.GetDepositHistoryAsync(txId: hash);
+        return data.NetworkList.Single().WithdrawMin;
+    }
 
-            if (history.Any())
-            {
-                Message($"Received {history.Single().Amount} {history.Single().Coin}");
-                return history.Single().Amount;
-            }
+    public sealed override string GetDepositAddress(string currency, string network)
+    {
+        var address = Wallet.GetDepositAddress(currency, network);
 
-            Message("Waiting Receive.");
+        return address.Address;
+    }
 
-            attempts +=10;
+    public sealed override async Task<string> GetDepositAddressAsync(string currency, string network)
+    {
+        var address = await Wallet.GetDepositAddressAsync(currency, network);
 
-            await Task.Delay(10000);
-        }
+        return address.Address;
+    }
 
-        throw new TimeoutException("Timeout recahed while waiting for receiving");
+    public sealed override decimal ApproveReceiving(string hash)
+    {
+        return Wallet.WaitForReceive(hash);
+    }
+
+    public sealed override async Task<decimal> ApproveReceivingAsync(string hash)
+    {
+        return await Wallet.WaitForReceiveAsync(hash);
+    }
+
+    public sealed override decimal GetBalance(string currency)
+    {
+        var data = Wallet.GetUserAsset("ETH");
+
+        return data.Free;
+    }
+
+    public sealed override async Task<decimal> GetBalanceAsync(string currency)
+    {
+        var data = await Wallet.GetUserAssetAsync("ETH");
+
+        return data.Free;
     }
 }
 

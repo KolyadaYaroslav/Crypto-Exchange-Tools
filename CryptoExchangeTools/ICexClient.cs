@@ -6,6 +6,11 @@ namespace CryptoExchangeTools;
 public interface ICexClient : IDisposable
 {
     /// <summary>
+    /// Invokes when client emits a message. E.g. Withdrawal status change.
+    /// </summary>
+    event EventHandler<string>? OnMessage;
+
+    /// <summary>
     /// Request withdrawal from exchange.
     /// </summary>
     /// <param name="currency">Currency name, subject to exchange formating.</param>
@@ -58,11 +63,66 @@ public interface ICexClient : IDisposable
     /// <returns>Resulting precision.</returns>
     Task<int> QueryWithdrawalPrecisionAsync(string currency, string network);
 
+    /// <summary>
+    /// Get Currency minimum withdrawal amount for specific network.
+    /// </summary>
+    /// <param name="currency">Currency name, subject to exchange formating.</param>
+    /// <param name="network">Network name, subject to exchange formating.</param>
+    /// <returns>Resulting withdrawal minimum amount.</returns>
+    decimal QueryWithdrawalMinAmount(string currency, string network);
 
     /// <summary>
-    /// Invokes when client emits a message. E.g. Withdrawal status change.
+    /// Get Currency minimum withdrawal amount for specific network.
     /// </summary>
-    event EventHandler<string>? OnMessage;
+    /// <param name="currency">Currency name, subject to exchange formating.</param>
+    /// <param name="network">Network name, subject to exchange formating.</param>
+    /// <returns>Resulting withdrawal minimum amount.</returns>
+    Task<decimal> QueryWithdrawalMinAmountAsync(string currency, string network);
+
+    /// <summary>
+    /// Get Address for sepositing currency on the specified network.
+    /// </summary>
+    /// <param name="currency">Currency name, subject to exchange formating.</param>
+    /// <param name="network">Network name, subject to exchange formating.</param>
+    /// <returns>Deposit address.</returns>
+    string GetDepositAddress(string currency, string network);
+
+    /// <summary>
+    /// Get Address for sepositing currency on the specified network.
+    /// </summary>
+    /// <param name="currency">Currency name, subject to exchange formating.</param>
+    /// <param name="network">Network name, subject to exchange formating.</param>
+    /// <returns>Deposit address.</returns>
+    Task<string> GetDepositAddressAsync(string currency, string network);
+
+    /// <summary>
+    /// Wait for transaction to get deposited on cex.
+    /// </summary>
+    /// <param name="hash">Transaction hash.</param>
+    /// <returns>Received amount.</returns>
+    decimal ApproveReceiving(string hash);
+
+    /// <summary>
+    /// Wait for transaction to get deposited on cex.
+    /// </summary>
+    /// <param name="hash">Transaction hash.</param>
+    /// <returns>Received amount.</returns>
+    Task<decimal> ApproveReceivingAsync(string hash);
+
+    /// <summary>
+    /// Querry Free Balance of specified currency on the exchange.
+    /// </summary>
+    /// <param name="currency">Currency name, subject to exchange formating.</param>
+    /// <returns></returns>
+    decimal GetBalance(string currency);
+
+    /// <summary>
+    /// Querry Free Balance of specified currency on the exchange.
+    /// </summary>
+    /// <param name="currency">Currency name, subject to exchange formating.</param>
+    /// <returns></returns>
+    Task<decimal> GetBalanceAsync(string currency);
+
 
     new void Dispose();
 }

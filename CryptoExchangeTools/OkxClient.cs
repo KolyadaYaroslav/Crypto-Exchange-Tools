@@ -17,10 +17,13 @@ public class OkxClient : CexClient, ICexClient
 
     public Funding Funding { get; }
 
+    public SubAccount SubAccount { get; }
+
     public OkxClient(string apiKey, string apiSecret, string passPhrase, WebProxy? proxy = null) : base(apiKey, apiSecret, passPhrase, Url, proxy)
     {
         Account = new(this);
         Funding = new(this);
+        SubAccount = new(this);
     }
 
     protected sealed override void TryLogin()
@@ -77,42 +80,142 @@ public class OkxClient : CexClient, ICexClient
 
     public WithdrawalRecord Withdraw(string currency, decimal amount, string address, string network, bool waitForApprove = true)
     {
-        throw new NotImplementedException();
+        if(waitForApprove)
+        {
+            var result = Funding.WithdrawAndWaitForSent(currency, amount, address, network);
+
+            return new WithdrawalRecord
+            {
+                TxId = result.WdId,
+                RequestedAmount = amount,
+                WaitedForApproval = waitForApprove,
+                TxHash = result.TxId
+            };
+        }
+        else
+        {
+            var result = Funding.WithdrawCurrency(currency, amount, address, network);
+
+            return new WithdrawalRecord
+            {
+                TxId = result.Single().WdId,
+                RequestedAmount = amount,
+                WaitedForApproval = waitForApprove
+            };
+        }
     }
 
     public async Task<WithdrawalRecord> WithdrawAsync(string currency, decimal amount, string address, string network, bool waitForApprove = true)
     {
-        throw new NotImplementedException();
+        if (waitForApprove)
+        {
+            var result = await Funding.WithdrawAndWaitForSentAsync(currency, amount, address, network);
+
+            return new WithdrawalRecord
+            {
+                TxId = result.WdId,
+                RequestedAmount = amount,
+                WaitedForApproval = waitForApprove,
+                TxHash = result.TxId
+            };
+        }
+        else
+        {
+            var result = await Funding.WithdrawCurrencyAsync(currency, amount, address, network);
+
+            return new WithdrawalRecord
+            {
+                TxId = result.Single().WdId,
+                RequestedAmount = amount,
+                WaitedForApproval = waitForApprove
+            };
+        }
     }
 
-    public decimal GetWithdrawalFee(string currency, string network)
+    public sealed override decimal GetWithdrawalFee(string currency, string network)
     {
-        throw new NotImplementedException();
+        var data = Funding.GetSingleCurrency(currency, network);
+
+        return data.MinFee;
     }
 
-    public async Task<decimal> GetWithdrawalFeeAsync(string currency, string network)
+    public sealed override async Task<decimal> GetWithdrawalFeeAsync(string currency, string network)
     {
-        throw new NotImplementedException();
+        var data = await Funding.GetSingleCurrencyAsync(currency, network);
+
+        return data.MinFee;
     }
 
-    public int QueryWithdrawalPrecision(string currency, string network)
+    public sealed override int QueryWithdrawalPrecision(string currency, string network)
     {
-        throw new NotImplementedException();
+        var data = Funding.GetSingleCurrency(currency, network);
+
+        return data.WdTickSz;
     }
 
-    public async Task<int> QueryWithdrawalPrecisionAsync(string currency, string network)
+    public sealed override async Task<int> QueryWithdrawalPrecisionAsync(string currency, string network)
     {
-        throw new NotImplementedException();
+        var data = await Funding.GetSingleCurrencyAsync(currency, network);
+
+        return data.WdTickSz;
     }
 
-    public sealed override decimal CustomReceive(string hash, int timeoutMin = 3600)
+    public sealed override decimal QueryWithdrawalMinAmount(string currency, string network)
     {
-        throw new NotImplementedException();
+        var data = Funding.GetSingleCurrency(currency, network);
+
+        return data.MinWd;
     }
 
-    public sealed override async Task<decimal> CustomReceiveAsync(string hash, int timeoutMin = 3600)
+    public sealed override async Task<decimal> QueryWithdrawalMinAmountAsync(string currency, string network)
     {
-        throw new NotImplementedException();
+        var data = await Funding.GetSingleCurrencyAsync(currency, network);
+
+        return data.MinWd;
+    }
+
+    public sealed override string GetDepositAddress(string currency, string network)
+    {
+        var address = Funding.GetDepositAddress(currency, network);
+
+        return address.Addr;
+    }
+
+    public sealed override async Task<string> GetDepositAddressAsync(string currency, string network)
+    {
+        var address = await Funding.GetDepositAddressAsync(currency, network);
+
+        return address.Addr;
+    }
+
+    public sealed override decimal GetBalance(string currency)
+    {
+        var data = Funding.GetFundingBalance(new List<string> { currency });
+
+        if (!data.Any())
+            return 0;
+
+        return data.Single().AvailBal;
+    }
+
+    public sealed override async Task<decimal> GetBalanceAsync(string currency)
+    {
+        var data = await Funding.GetFundingBalanceAsync(new List<string> { currency });
+
+        if (!data.Any())
+            return 0;
+
+        return data.Single().AvailBal;
+    }
+
+    public sealed override decimal ApproveReceiving(string hash)
+    {
+        return Funding.WaitForReceive(hash);
+    }
+
+    public sealed override async Task<decimal> ApproveReceivingAsync(string hash)
+    {
+        return await Funding.WaitForReceiveAsync(hash);
     }
 }
 

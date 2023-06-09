@@ -47,11 +47,13 @@ public class WithdrawalFailedException : Exception
 {
     public string id { get; set; }
     public string Status { get; set; }
+    public string? FailReason { get; set; }
 
-    public WithdrawalFailedException(string id, string status) : base("Withdraw has failed.")
+    public WithdrawalFailedException(string id, string status, string? failReason) : base("Withdraw has failed.")
     {
         this.id = id;
         Status = status;
+        FailReason = failReason;
     }
 }
 

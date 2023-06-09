@@ -1,4 +1,4 @@
-﻿namespace CryptoExchangeTools.Exceptions.cs.Kucoin;
+﻿namespace CryptoExchangeTools.Exceptions.Kucoin;
 
 public class Withdrawals
 {

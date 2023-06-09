@@ -22,8 +22,13 @@
     <None Remove="Requests\GateIoRequests\" />
     <None Remove="Requests\KucoinRequests\" />
     <None Remove="Models\Kucoin\" />
-    <None Remove="Exceptions.cs\" />
     <None Remove="Exceptions.cs\Kucoin\" />
+    <None Remove="Models\Binance\Futures\" />
+    <None Remove="Models\Binance\Futures\USDM\" />
+    <None Remove="Requests\BinanceRequests\Futures\" />
+    <None Remove="Requests\BinanceRequests\Futures\USDM\" />
+    <None Remove="Exceptions\Okx\" />
+    <None Remove="Utility\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
@@ -37,7 +42,12 @@
     <Folder Include="Requests\GateIoRequests\" />
     <Folder Include="Requests\KucoinRequests\" />
     <Folder Include="Models\Kucoin\" />
-    <Folder Include="Exceptions.cs\" />
-    <Folder Include="Exceptions.cs\Kucoin\" />
+    <Folder Include="Exceptions\Kucoin\" />
+    <Folder Include="Models\Binance\Futures\" />
+    <Folder Include="Models\Binance\Futures\USDM\" />
+    <Folder Include="Requests\BinanceRequests\Futures\" />
+    <Folder Include="Requests\BinanceRequests\Futures\USDM\" />
+    <Folder Include="Exceptions\Okx\" />
+    <Folder Include="Utility\" />
   </ItemGroup>
 </Project>

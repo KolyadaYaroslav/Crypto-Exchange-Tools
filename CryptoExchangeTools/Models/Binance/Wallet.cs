@@ -366,3 +366,18 @@ public class DepositHistory
         WaitingUserConfirm = 8
     }
 }
+
+public class DepositAddress
+{
+    [JsonProperty("address")]
+    public required string Address { get; set; }
+
+    [JsonProperty("coin")]
+    public required string Coin { get; set; }
+
+    [JsonProperty("tag")]
+    public string? Tag { get; set; }
+
+    [JsonProperty("url")]
+    public string? Url { get; set; }
+}

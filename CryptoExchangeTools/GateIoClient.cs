@@ -144,36 +144,6 @@ public class GateIoClient : CexClient, ICexClient
         }
     }
 
-    public decimal GetWithdrawalFee(string currency, string network)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<decimal> GetWithdrawalFeeAsync(string currency, string network)
-    {
-        throw new NotImplementedException();
-    }
-
-    public int QueryWithdrawalPrecision(string currency, string network)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<int> QueryWithdrawalPrecisionAsync(string currency, string network)
-    {
-        throw new NotImplementedException();
-    }
-
-    public sealed override decimal CustomReceive(string hash, int timeoutMin = 3600)
-    {
-        throw new NotImplementedException();
-    }
-
-    public sealed override async Task<decimal> CustomReceiveAsync(string hash, int timeoutMin = 3600)
-    {
-        throw new NotImplementedException();
-    }
-
     #endregion Global Methods
 }
 

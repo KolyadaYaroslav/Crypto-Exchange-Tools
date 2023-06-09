@@ -192,42 +192,60 @@ public class KucoinClient : CexClient, ICexClient
         }
     }
 
-    public decimal GetWithdrawalFee(string currency, string network)
+    public sealed override decimal GetWithdrawalFee(string currency, string network)
     {
         var quota = Withdrawals.GetWithdrawalQuotas(currency, network);
 
         return quota.WithdrawMinFee;
     }
 
-    public async Task<decimal> GetWithdrawalFeeAsync(string currency, string network)
+    public sealed override async Task<decimal> GetWithdrawalFeeAsync(string currency, string network)
     {
         var quota = await Withdrawals.GetWithdrawalQuotasAsync(currency, network);
 
         return quota.WithdrawMinFee;
     }
 
-    public int QueryWithdrawalPrecision(string currency, string network)
+    public sealed override int QueryWithdrawalPrecision(string currency, string network)
     {
         var quota = Withdrawals.GetWithdrawalQuotas(currency, network);
 
         return quota.Precision;
     }
 
-    public async Task<int> QueryWithdrawalPrecisionAsync(string currency, string network)
+    public sealed override async Task<int> QueryWithdrawalPrecisionAsync(string currency, string network)
     {
         var quota = await Withdrawals.GetWithdrawalQuotasAsync(currency, network);
 
         return quota.Precision;
     }
 
-    public sealed override decimal CustomReceive(string hash, int timeoutMin = 3600)
+    public sealed override decimal QueryWithdrawalMinAmount(string currency, string network)
     {
-        throw new NotImplementedException();
+        var quota = Withdrawals.GetWithdrawalQuotas(currency, network);
+
+        return quota.WithdrawMinSize;
     }
 
-    public sealed override async Task<decimal> CustomReceiveAsync(string hash, int timeoutMin = 3600)
+    public sealed override async Task<decimal> QueryWithdrawalMinAmountAsync(string currency, string network)
     {
-        throw new NotImplementedException();
+        var quota = await Withdrawals.GetWithdrawalQuotasAsync(currency, network);
+
+        return quota.WithdrawMinSize;
+    }
+
+    public sealed override string GetDepositAddress(string currency, string network)
+    {
+        var address = Deposit.GetDepositAddress(currency, network);
+
+        return address.Address;
+    }
+
+    public sealed override async Task<string> GetDepositAddressAsync(string currency, string network)
+    {
+        var address = await Deposit.GetDepositAddressAsync(currency, network);
+
+        return address.Address;
     }
 
     #endregion Global Methods

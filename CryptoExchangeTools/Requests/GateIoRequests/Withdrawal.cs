@@ -193,7 +193,7 @@ public class Withdrawal
             || txData.Status == WithdrawalStatus.BCODE
             || txData.Status == WithdrawalStatus.FAIL
             || txData.Status == WithdrawalStatus.INVALID)
-            throw new WithdrawalFailedException(txData.Id.ToString(), txData.Status.ToString());
+            throw new WithdrawalFailedException(txData.Id.ToString(), txData.Status.ToString(), null);
 
         return false;
     }

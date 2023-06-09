@@ -4,7 +4,9 @@ using RestSharp;
 
 namespace CryptoExchangeTools;
 
-public abstract class CexClient
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+
+public abstract class CexClient : IDisposable
 {
     private string url;
 
@@ -117,9 +119,69 @@ public abstract class CexClient
         return await restClient.ExecuteAsync(request);
     }
 
-    public abstract decimal CustomReceive(string hash, int timeoutMin = 3600);
+    #region ICex Methods
 
-    public abstract Task<decimal> CustomReceiveAsync(string hash, int timeoutMin = 3600);
+    public virtual decimal GetWithdrawalFee(string currency, string network)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual async Task<decimal> GetWithdrawalFeeAsync(string currency, string network)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual int QueryWithdrawalPrecision(string currency, string network)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual async Task<int> QueryWithdrawalPrecisionAsync(string currency, string network)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual decimal QueryWithdrawalMinAmount(string currency, string network)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual async Task<decimal> QueryWithdrawalMinAmountAsync(string currency, string network)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual string GetDepositAddress(string currency, string network)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual async Task<string> GetDepositAddressAsync(string currency, string network)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual decimal ApproveReceiving(string hash)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual Task<decimal> ApproveReceivingAsync(string hash)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual decimal GetBalance(string currency)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual async Task<decimal> GetBalanceAsync(string currency)
+    {
+        throw new NotImplementedException();
+    }
+
+    #endregion
 
     public void Dispose()
     {

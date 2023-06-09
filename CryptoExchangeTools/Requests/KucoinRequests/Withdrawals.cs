@@ -318,7 +318,7 @@ public class Withdrawals
             return true;
 
         if (txData.Status == WithdrawHistory.Status.FAILURE)
-            throw new WithdrawalFailedException(txData.Id.ToString(), txData.Status.ToString());
+            throw new WithdrawalFailedException(txData.Id.ToString(), txData.Status.ToString(), txData.Remark);
 
         return false;
     }

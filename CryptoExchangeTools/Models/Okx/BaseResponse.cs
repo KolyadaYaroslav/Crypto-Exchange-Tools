@@ -1,10 +1,11 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using CryptoExchangeTools.Exceptions.Okx;
+using Newtonsoft.Json.Linq;
 
 namespace CryptoExchangeTools.Models.Okx;
 
 public class BaseResponse
 {
-    public BaseResponse(string code, JArray? data, string msg)
+    public BaseResponse(string code, JToken? data, string msg)
     {
         this.code = int.Parse(code);
         this.data = data;
@@ -12,11 +13,14 @@ public class BaseResponse
     }
 
     public required int code { get; set; }
-	public JArray? data { get; set; }
+	public JToken? data { get; set; }
 	public required string msg { get; set; }
 
     public T ParseData<T>()
     {
+        if (code != 0)
+            HandleException();
+
         if (data is null)
             throw new Exception("Response Data is null");
 
@@ -24,6 +28,11 @@ public class BaseResponse
             ?? throw new Exception($"Can't cast response data as {nameof(T)}");
 
         return parsed;
+    }
+
+    public void HandleException()
+    {
+        OkxException.ThrowExceptionBasedOnCode(code, msg);
     }
 }
 

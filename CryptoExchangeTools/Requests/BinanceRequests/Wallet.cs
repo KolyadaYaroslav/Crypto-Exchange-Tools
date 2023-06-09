@@ -485,6 +485,53 @@ public class Wallet
 
     #endregion GetDepositHistory
 
+    #region GetDepositAddress
+
+    /// <summary>
+    /// Fetch deposit address with network..
+    /// </summary>
+    /// <param name="coin"></param>
+    /// <param name="network">If network is not send, return with default network of the coin.</param>
+    /// <param name="recvWindow"></param>
+    /// <returns></returns>
+    public DepositAddress GetDepositAddress(string coin, string? network = null, long recvWindow = -1)
+    {
+        var request = BuildGetDepositAddress(coin, network, recvWindow);
+
+        return Client.ExecuteRequest<DepositAddress>(request);
+    }
+
+    /// <summary>
+    /// Fetch deposit address with network..
+    /// </summary>
+    /// <param name="coin"></param>
+    /// <param name="network">If network is not send, return with default network of the coin.</param>
+    /// <param name="recvWindow"></param>
+    /// <returns></returns>
+    public async Task<DepositAddress> GetDepositAddressAsync(string coin, string? network = null, long recvWindow = -1)
+    {
+        var request = BuildGetDepositAddress(coin, network, recvWindow);
+
+        return await Client.ExecuteRequestAsync<DepositAddress>(request);
+    }
+
+    private static RestRequest BuildGetDepositAddress(string coin, string? network = null, long recvWindow = -1)
+    {
+        var request = new RestRequest("sapi/v1/capital/deposit/address", Method.Get);
+
+        request.AddParameter("coin", coin);
+
+        if(!string.IsNullOrEmpty(network))
+            request.AddParameter("network", network);
+
+        if(recvWindow != -1)
+            request.AddParameter("recvWindow", recvWindow);
+
+        return request;
+    }
+
+    #endregion GetDepositAddress
+
     #endregion Original Methods
 
     #region Derived Methods
@@ -535,7 +582,7 @@ public class Wallet
                 if (txData.Status == WithdrawStatus.Cancelled
                 || txData.Status == WithdrawStatus.Failure
                 || txData.Status == WithdrawStatus.Rejected)
-                    throw new WithdrawalFailedException(withdrawalId.ToString(), txData.Status.ToString());
+                    throw new WithdrawalFailedException(withdrawalId.ToString(), txData.Status.ToString(), txData.Info);
             }
             limit--;
         }
@@ -585,7 +632,7 @@ public class Wallet
                 if (txData.Status == WithdrawStatus.Cancelled
                 || txData.Status == WithdrawStatus.Failure
                 || txData.Status == WithdrawStatus.Rejected)
-                    throw new WithdrawalFailedException(txData.Id, txData.Status.ToString());
+                    throw new WithdrawalFailedException(txData.Id, txData.Status.ToString(), txData.Info);
             }
             limit--;
         }
@@ -704,6 +751,62 @@ public class Wallet
     }
 
     #endregion WithdrawAllCoinBalanceAndWaitForSent
+
+    #region WaitForReceive
+
+    private async Task<decimal> CheckDepositstatus(string hash)
+    {
+        for(int i = 0; i < 1000; i ++)
+        {
+            var result = await GetDepositHistoryAsync(txId: hash);
+
+            var tx = result.Single();
+
+            Client.Message(tx.Status.ToString());
+
+            if (tx.Status == DepositStatus.success)
+                return tx.Amount;
+
+            if (tx.Status == DepositStatus.WrongDeposit)
+                throw new Exception($"tx status - {tx.Status.ToString()}");
+
+            await Task.Delay(5000);
+        }
+
+        throw new Exception($"Didn't receive positive deposit status after 1000 attempts.");
+    }
+
+    public decimal WaitForReceive(string hash)
+    {
+        for (int i = 0; i < 1000; i++)
+        {
+            var history = GetDepositHistory(txId: hash);
+
+            if (history.Any())
+                break;
+
+            Task.Delay(5000).Wait();
+        }
+
+        return CheckDepositstatus(hash).Result;
+    }
+
+    public async Task<decimal> WaitForReceiveAsync(string hash)
+    {
+        for(int i = 0; i < 1000; i ++)
+        {
+            var history = await GetDepositHistoryAsync(txId: hash);
+
+            if(history.Any())
+                break;
+
+            await Task.Delay(5000);
+        }
+
+        return await CheckDepositstatus(hash);
+    }
+
+    #endregion WaitForReceive
 
     #endregion Derived Methods
 }

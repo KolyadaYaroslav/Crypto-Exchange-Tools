@@ -52,5 +52,51 @@ public class Deposit
     #endregion Get Deposit Addresses
 
     #endregion Original Methods
+
+    #region Derived Methods
+
+    #region Get Deposit Address
+
+    /// <summary>
+    /// Retrieve the deposit addresses foe currency on a single network, including previously-used addresses.
+    /// </summary>
+    /// <param name="ccy">Currency</param>
+    /// <param name="network">Network</param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    public DepositAddress GetDepositAddress(string ccy, string network)
+    {
+        var addresses = GetDepositAddresses(ccy);
+
+        var matching = addresses.Where(x => x.Chain == network.ToUpper());
+
+        if (!matching.Any())
+            throw new Exception($"There is no deposit address for {ccy} on {network}. Check if Currency and network are spelled correctly.");
+
+        return matching.Single();
+    }
+
+    /// <summary>
+    /// Retrieve the deposit addresses foe currency on a single network, including previously-used addresses.
+    /// </summary>
+    /// <param name="ccy">Currency</param>
+    /// <param name="network">Network</param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    public async Task<DepositAddress> GetDepositAddressAsync(string ccy, string network)
+    {
+        var addresses = await GetDepositAddressesAsync(ccy);
+
+        var matching = addresses.Where(x => x.Chain == network.ToUpper());
+
+        if (!matching.Any())
+            throw new Exception($"There is no deposit address for {ccy} on {network}. Check if Currency and network are spelled correctly.");
+
+        return matching.Single();
+    }
+
+    #endregion Get Deposit Address
+
+    #endregion Derived Methods
 }
 
