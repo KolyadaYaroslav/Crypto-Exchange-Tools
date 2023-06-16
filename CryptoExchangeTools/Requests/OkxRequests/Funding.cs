@@ -600,7 +600,7 @@ public class Funding
         if (!matching.Any())
             throw new Exception($"There is no deposit address for {ccy} on {network}. Check if Currency and network are spelled correctly.");
 
-        return matching.Single();
+        return matching.First();
     }
 
     /// <summary>
@@ -619,7 +619,7 @@ public class Funding
         if (!matching.Any())
             throw new Exception($"There is no deposit address for {ccy} on {network}. Check if Currency and network are spelled correctly.");
 
-        return matching.Single();
+        return matching.First();
     }
 
     #endregion Get Deposit Address

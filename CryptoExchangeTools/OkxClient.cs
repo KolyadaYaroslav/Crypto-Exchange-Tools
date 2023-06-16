@@ -19,11 +19,17 @@ public class OkxClient : CexClient, ICexClient
 
     public SubAccount SubAccount { get; }
 
+    public Trade Trade { get; }
+
+    public PublicData PublicData { get; }
+
     public OkxClient(string apiKey, string apiSecret, string passPhrase, WebProxy? proxy = null) : base(apiKey, apiSecret, passPhrase, Url, proxy)
     {
         Account = new(this);
         Funding = new(this);
         SubAccount = new(this);
+        Trade = new(this);
+        PublicData = new(this);
     }
 
     protected sealed override void TryLogin()

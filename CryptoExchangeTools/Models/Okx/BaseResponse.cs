@@ -32,7 +32,7 @@ public class BaseResponse
 
     public void HandleException()
     {
-        OkxException.ThrowExceptionBasedOnCode(code, msg);
+        OkxException.ThrowExceptionBasedOnCode(code, msg, data);
     }
 }
 

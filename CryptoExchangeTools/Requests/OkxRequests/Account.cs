@@ -55,5 +55,33 @@ public class Account
     #endregion GetTradingBalance
 
     #endregion Original Methods
+
+    #region Derived Mthods
+
+    #region Get Currency Trading Available Balance
+
+    public decimal GetCurrencyTradingAvailableBalance(string ccy)
+    {
+        var data = GetTradingBalance(ccy);
+
+        if (!data.Details.Any())
+            return 0;
+
+        return data.Details.Single().AvailBal;
+    }
+
+    public async Task<decimal> GetCurrencyTradingAvailableBalanceAsync(string ccy)
+    {
+        var data = await GetTradingBalanceAsync(ccy);
+
+        if (!data.Details.Any())
+            return 0;
+
+        return data.Details.Single().AvailBal;
+    }
+
+    #endregion Get Currency Trading Available Balance
+
+    #endregion Derived Mthods
 }
 
