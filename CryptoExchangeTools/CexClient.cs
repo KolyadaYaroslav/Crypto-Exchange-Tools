@@ -23,7 +23,7 @@ public abstract class CexClient : IDisposable
         OnMessage?.Invoke(this, message);
     }
 
-    public CexClient(string apiKey, string apiSecret, string url, WebProxy? proxy)
+    public CexClient(string apiKey, string apiSecret, string url, WebProxy? proxy, bool checkLogin = false)
     {
         this.url = url;
         ApiKey = apiKey;
@@ -32,7 +32,8 @@ public abstract class CexClient : IDisposable
 
         restClient = CreateRestClient();
 
-        TryLogin();
+        if(checkLogin)
+            TryLogin();
     }
 
     public CexClient(string apiKey, string apiSecret, string passPhrase, string url, WebProxy? proxy)
