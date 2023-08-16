@@ -4,17 +4,15 @@ using RestSharp;
 
 namespace CryptoExchangeTools;
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-
 public abstract class CexClient : IDisposable
 {
-    private string url;
+    private readonly string url;
 
     protected readonly string ApiKey;
     protected readonly string ApiSecret;
     protected readonly string? PassPhrase;
 
-    private WebProxy? proxy;
+    private readonly WebProxy? proxy;
 
     private RestClient restClient;
 
@@ -126,7 +124,7 @@ public abstract class CexClient : IDisposable
         throw new NotImplementedException();
     }
 
-    public virtual async Task<decimal> GetWithdrawalFeeAsync(string currency, string network)
+    public virtual Task<decimal> GetWithdrawalFeeAsync(string currency, string network)
     {
         throw new NotImplementedException();
     }
@@ -136,7 +134,7 @@ public abstract class CexClient : IDisposable
         throw new NotImplementedException();
     }
 
-    public virtual async Task<int> QueryWithdrawalPrecisionAsync(string currency, string network)
+    public virtual Task<int> QueryWithdrawalPrecisionAsync(string currency, string network)
     {
         throw new NotImplementedException();
     }
@@ -146,7 +144,7 @@ public abstract class CexClient : IDisposable
         throw new NotImplementedException();
     }
 
-    public virtual async Task<decimal> QueryWithdrawalMinAmountAsync(string currency, string network)
+    public virtual Task<decimal> QueryWithdrawalMinAmountAsync(string currency, string network)
     {
         throw new NotImplementedException();
     }
@@ -156,7 +154,7 @@ public abstract class CexClient : IDisposable
         throw new NotImplementedException();
     }
 
-    public virtual async Task<string> GetDepositAddressAsync(string currency, string network)
+    public virtual Task<string> GetDepositAddressAsync(string currency, string network)
     {
         throw new NotImplementedException();
     }
@@ -176,10 +174,61 @@ public abstract class CexClient : IDisposable
         throw new NotImplementedException();
     }
 
-    public virtual async Task<decimal> GetBalanceAsync(string currency)
+    public virtual Task<decimal> GetBalanceAsync(string currency)
     {
         throw new NotImplementedException();
     }
+
+    public virtual decimal GetMarketPrice(string symbol)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual Task<decimal> GetMarketPriceAsync(string symbol)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual decimal GetAmountIn(string currencyIn, string currencyOut, decimal amountOut, decimal slippage = 0.998m)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual Task<decimal> GetAmountInAsync(string currencyIn, string currencyOut, decimal amountOut, decimal slippage = 0.998m)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual decimal FlattenOrderAmount(string symbol, decimal amount, int stepSizeDown = 0)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual Task<decimal> FlattenOrderAmountAsync(string symbol, decimal amount, int stepSizeDown = 0)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual decimal ForcedMarketOrder(string baseCurrency, string quoteCurrency, OrderDirection direction, decimal amount, CalculationBase calculationBase = CalculationBase.Base)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual Task<decimal> ForcedMarketOrderAsync(string baseCurrency, string quoteCurrency, OrderDirection direction, decimal amount, CalculationBase calculationBase = CalculationBase.Base)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual decimal GetMinOrderSizeForPair(string baseCurrency, string quoteCurrency, CalculationBase calculationBase = CalculationBase.Base)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual Task<decimal> GetMinOrderSizeForPairAsync(string baseCurrency, string quoteCurrency, CalculationBase calculationBase = CalculationBase.Base)
+    {
+        throw new NotImplementedException();
+    }
+
 
     #endregion
 

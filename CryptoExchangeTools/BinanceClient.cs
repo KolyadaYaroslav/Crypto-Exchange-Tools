@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using RestSharp;
 using CryptoExchangeTools.Requests.BinanceRequests;
 using CryptoExchangeTools.Models.ICex;
+using CryptoExchangeTools.Models.Binance;
 
 namespace CryptoExchangeTools;
 
@@ -232,16 +233,206 @@ public class BinanceClient : CexClient, ICexClient
 
     public sealed override decimal GetBalance(string currency)
     {
-        var data = Wallet.GetUserAsset("ETH");
+        var data = Wallet.GetUserAsset(currency);
 
         return data.Free;
     }
 
     public sealed override async Task<decimal> GetBalanceAsync(string currency)
     {
-        var data = await Wallet.GetUserAssetAsync("ETH");
+        var data = await Wallet.GetUserAssetAsync(currency);
 
         return data.Free;
+    }
+
+    public sealed override decimal GetMarketPrice(string symbol)
+    {
+        return Market.GetPriceTicker(symbol).Price;
+    }
+
+    public sealed override async Task<decimal> GetMarketPriceAsync(string symbol)
+    {
+        var data = await Market.GetPriceTickerAsync(symbol);
+
+        return data.Price;
+    }
+
+    public sealed override decimal GetAmountIn(string currencyIn, string currencyOut, decimal amountOut, decimal slippage = 0.998m)
+    {
+        bool reversed = false;
+
+        string symbol = currencyIn.ToUpper() + currencyOut.ToUpper();
+
+        try
+        {
+            Market.GetPriceTicker(symbol);
+        }
+        catch (RequestNotSuccessfulException ex) when (ex.Response == "{\"code\":-1121,\"msg\":\"Invalid symbol.\"}")
+        {
+            symbol = currencyOut.ToUpper() + currencyIn.ToUpper();
+
+            reversed = true;
+        }
+
+        var price = GetMarketPrice(symbol);
+
+        if (reversed)
+            price = (1 / price);
+
+        Message($"Price: {price}");
+
+        return amountOut / slippage / price;
+    }
+
+    public sealed override async Task<decimal> GetAmountInAsync(string currencyIn, string currencyOut, decimal amountOut, decimal slippage = 0.998m)
+    {
+        bool reversed = false;
+
+        string symbol = currencyIn.ToUpper() + currencyOut.ToUpper();
+
+        try
+        {
+            await Market.GetPriceTickerAsync(symbol);
+        }
+        catch (RequestNotSuccessfulException ex) when (ex.Response == "{\"code\":-1121,\"msg\":\"Invalid symbol.\"}")
+        {
+            symbol = currencyOut.ToUpper() + currencyIn.ToUpper();
+
+            reversed = true;
+        }
+
+        var price = await GetMarketPriceAsync(symbol);
+
+        if (reversed)
+            price = (1 / price);
+
+        Message($"Price: {price}");
+
+        return amountOut / slippage / price;
+    }
+
+    public sealed override decimal FlattenOrderAmount(string symbol, decimal amount, int stepSizeDown = 0)
+    {
+        return Trade.FlattenOrderAmount(symbol, amount, stepSizeDown);
+    }
+
+    public sealed override async Task<decimal> FlattenOrderAmountAsync(string symbol, decimal amount, int stepSizeDown = 0)
+    {
+        return await Trade.FlattenOrderAmountAsync(symbol, amount, stepSizeDown);
+    }
+
+    public sealed override decimal ForcedMarketOrder(string baseCurrency, string quoteCurrency, OrderDirection direction, decimal amount, CalculationBase calculationBase = CalculationBase.Base)
+    {
+        string symbol = baseCurrency.ToUpper() + quoteCurrency.ToUpper();
+
+        try
+        {
+            Market.GetPriceTicker(symbol);
+        }
+        catch (RequestNotSuccessfulException ex) when (ex.Response == "{\"code\":-1121,\"msg\":\"Invalid symbol.\"}")
+        {
+            symbol = quoteCurrency.ToUpper() + baseCurrency.ToUpper();
+
+            (quoteCurrency, baseCurrency) = (baseCurrency, quoteCurrency);
+
+            direction = HelperMethods.ReverseOrderDirection(direction);
+
+            calculationBase = HelperMethods.ReverseCalculationBase(calculationBase);
+        }
+
+        var orderSide = direction == OrderDirection.Buy ? OrderSide.BUY : OrderSide.SELL;
+
+        if(calculationBase == CalculationBase.Quote)
+            amount = GetAmountIn(baseCurrency, quoteCurrency, amount);
+
+        var flattenedAmount = FlattenOrderAmount(symbol, amount);
+
+        for (int i = 0; i < 50; i++)
+        {
+            try
+            {
+                var order = Trade.NewOrder(symbol, orderSide, OrderType.MARKET, quantity: flattenedAmount);
+
+                Message($"Executed Order {symbol}, amount: {flattenedAmount}, side: {orderSide}");
+
+                if(orderSide == OrderSide.BUY)
+                    return order.ExecutedQty;
+
+                return order.CummulativeQuoteQty;
+            }
+            catch (RequestNotSuccessfulException ex) when (ex.Response == "{\"code\":-1013,\"msg\":\"Filter failure: LOT_SIZE\"}")
+            {
+                Message(ex.Response);
+
+                Message("Retrying order.");
+
+                flattenedAmount = FlattenOrderAmount(symbol, flattenedAmount * 0.995m);
+            }
+        }
+
+        throw new Exception("Can not place an order for 50 attempts!");
+    }
+
+    public sealed override async Task<decimal> ForcedMarketOrderAsync(string baseCurrency, string quoteCurrency, OrderDirection direction, decimal amount, CalculationBase calculationBase = CalculationBase.Base)
+    {
+        string symbol = baseCurrency.ToUpper() + quoteCurrency.ToUpper();
+
+        try
+        {
+            await Market.GetPriceTickerAsync(symbol);
+        }
+        catch (RequestNotSuccessfulException ex) when (ex.Response == "{\"code\":-1121,\"msg\":\"Invalid symbol.\"}")
+        {
+            symbol = quoteCurrency.ToUpper() + baseCurrency.ToUpper();
+
+            (quoteCurrency, baseCurrency) = (baseCurrency, quoteCurrency);
+
+            direction = HelperMethods.ReverseOrderDirection(direction);
+
+            calculationBase = HelperMethods.ReverseCalculationBase(calculationBase);
+        }
+
+        var orderSide = direction == OrderDirection.Buy ? OrderSide.BUY : OrderSide.SELL;
+
+        if (calculationBase == CalculationBase.Quote)
+            amount = await GetAmountInAsync(baseCurrency, quoteCurrency, amount);
+
+        var flattenedAmount = await FlattenOrderAmountAsync(symbol, amount);
+
+        for (int i = 0; i < 50; i++)
+        {
+            try
+            {
+                var order = await Trade.NewOrderAsync(symbol, orderSide, OrderType.MARKET, quantity: flattenedAmount);
+
+                Message($"Executed Order {symbol}, amount: {flattenedAmount}, side: {orderSide}");
+
+                if (orderSide == OrderSide.BUY)
+                    return order.ExecutedQty;
+
+                return order.CummulativeQuoteQty;
+            }
+            catch (RequestNotSuccessfulException ex) when (ex.Response == "{\"code\":-1013,\"msg\":\"Filter failure: LOT_SIZE\"}")
+            {
+                Message(ex.Response);
+
+                Message("Retrying order.");
+
+                flattenedAmount = await FlattenOrderAmountAsync(symbol, flattenedAmount * 0.995m);
+            }
+        }
+
+        throw new Exception("Can not place an order for 50 attempts!");
+    }
+
+    public sealed override decimal GetMinOrderSizeForPair(string baseCurrency, string quoteCurrency, CalculationBase calculationBase = CalculationBase.Base)
+    {
+        return Market.GetMinOrderSizeForPair(baseCurrency, quoteCurrency, calculationBase);
+    }
+
+    public sealed override async Task<decimal> GetMinOrderSizeForPairAsync(string baseCurrency, string quoteCurrency, CalculationBase calculationBase = CalculationBase.Base)
+    {
+        return await Market.GetMinOrderSizeForPairAsync(baseCurrency, quoteCurrency, calculationBase);
     }
 }
 

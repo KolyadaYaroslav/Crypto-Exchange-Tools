@@ -578,7 +578,7 @@ public class Trade
 
     #region Helper Methods
 
-    private static string GetTargetCcy(string instId, OrderSide side)
+    public static string GetTargetCcy(string instId, OrderSide side)
     {
         var split = instId.Split('-');
 
@@ -588,7 +588,7 @@ public class Trade
         return split[1];
     }
 
-    private static string GetBaseCcy(string instId, OrderSide side)
+    public static string GetBaseCcy(string instId, OrderSide side)
     {
         var split = instId.Split('-');
 

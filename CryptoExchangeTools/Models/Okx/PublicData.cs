@@ -3,15 +3,6 @@ using Newtonsoft.Json.Converters;
 
 namespace CryptoExchangeTools.Models.Okx;
 
-public enum InstrumentType
-{
-    SPOT,
-    MARGIN,
-    SWAP,
-    FUTURES,
-    OPTION
-}
-
 public class InstrumentInfo
 {
     [JsonProperty("alias")]

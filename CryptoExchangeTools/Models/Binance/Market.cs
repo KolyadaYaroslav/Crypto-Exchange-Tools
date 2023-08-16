@@ -186,3 +186,12 @@ public partial class Filter
     public long MaxNumAlgoOrders { get; set; }
 }
 
+public class SymbolPriceTicker
+{
+    [JsonProperty("Symbol")]
+    public required string symbol { get; set; }
+
+    [JsonProperty("price")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal Price { get; set; }
+}

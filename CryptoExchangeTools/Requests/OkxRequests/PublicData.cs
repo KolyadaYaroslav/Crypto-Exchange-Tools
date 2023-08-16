@@ -110,6 +110,20 @@ public class PublicData
 
     #endregion Get Instrument Name
 
+    #region Get Single Instrument
+
+    public InstrumentInfo GetSingleInstrument(string symbol, InstrumentType instType)
+    {
+        return GetInstruments(instType, instId: symbol).Single();
+    }
+
+    public async Task<InstrumentInfo> GetSingleInstrumentAsync(string symbol, InstrumentType instType)
+    {
+        return (await GetInstrumentsAsync(instType, instId: symbol)).Single();
+    }
+
+    #endregion Get Single Instrument
+
     #endregion Derived Methods
 }
 

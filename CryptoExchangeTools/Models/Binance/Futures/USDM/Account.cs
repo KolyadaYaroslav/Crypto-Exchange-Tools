@@ -354,3 +354,62 @@ public partial class Order
     [JsonProperty("priceProtect")]
     public bool PriceProtect { get; set; }
 }
+
+public class FuturesAccaountBalance
+{
+    /// <summary>
+    /// unique account code.
+    /// </summary>
+    [JsonProperty("accountAlias")]
+    public required string AccountAlias { get; set; }
+
+    /// <summary>
+    /// asset name.
+    /// </summary>
+    [JsonProperty("asset")]
+    public required string Asset { get; set; }
+
+    /// <summary>
+    /// wallet balance.
+    /// </summary>
+    [JsonProperty("balance")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal Balance { get; set; }
+
+    /// <summary>
+    /// rossed wallet balance.
+    /// </summary>
+    [JsonProperty("crossWalletBalance")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal CrossWalletBalance { get; set; }
+
+    /// <summary>
+    /// unrealized profit of crossed positions
+    /// </summary>
+    [JsonProperty("crossUnPnl")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal CrossUnPnl { get; set; }
+
+    /// <summary>
+    /// available balance.
+    /// </summary>
+    [JsonProperty("availableBalance")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal AvailableBalance { get; set; }
+
+    /// <summary>
+    /// maximum amount for transfer out.
+    /// </summary>
+    [JsonProperty("maxWithdrawAmount")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal MaxWithdrawAmount { get; set; }
+
+    /// <summary>
+    /// whether the asset can be used as margin in Multi-Assets mode.
+    /// </summary>
+    [JsonProperty("marginAvailable")]
+    public bool MarginAvailable { get; set; }
+
+    [JsonProperty("updateTime")]
+    public long UpdateTime { get; set; }
+}

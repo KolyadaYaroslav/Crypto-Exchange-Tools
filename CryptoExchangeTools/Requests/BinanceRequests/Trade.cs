@@ -160,7 +160,7 @@ public class Trade
 
         var request = new RestRequest("api/v3/order", Method.Post);
 
-        request.AddParameter("symbol", symbol);
+        request.AddParameter("symbol", symbol.ToUpper());
         request.AddParameter("side", side.ToString());
         request.AddParameter("type", type.ToString());
 
@@ -209,5 +209,55 @@ public class Trade
     #endregion New Order
 
     #endregion Original Methods
+
+    #region Derived Methods
+
+    #region Flatten Order Amount
+
+    /// <summary>
+    /// Flatten order mount according to exchange trading filters.
+    /// </summary>
+    /// <param name="symbol">Trading ticekr</param>
+    /// <param name="amount">Initial amount</param>
+    /// <param name="stepSizeDown">Determines by how many trading steps the resulting amount will be decremented.</param>
+    /// <returns></returns>
+    public decimal FlattenOrderAmount(string symbol, decimal amount, int stepSizeDown = 0)
+    {
+        var stepSize = Client.Market.GetTradeStepSize(symbol);
+
+        if (stepSizeDown > 0)
+            amount -= stepSizeDown * stepSize;
+
+        var decimals = Math.Log10((double)stepSize);
+
+        var multiplyer = (decimal)Math.Pow(10, -decimals);
+
+        return Math.Floor(amount * multiplyer) / multiplyer;
+    }
+
+    /// <summary>
+    /// Flatten order mount according to exchange trading filters.
+    /// </summary>
+    /// <param name="symbol">Trading ticekr</param>
+    /// <param name="amount">Initial amount</param>
+    /// <param name="stepSizeDown">Determines by how many trading steps the resulting amount will be decremented.</param>
+    /// <returns></returns>
+    public async Task<decimal> FlattenOrderAmountAsync(string symbol, decimal amount, int stepSizeDown = 0)
+    {
+        var stepSize = await Client.Market.GetTradeStepSizeAsync(symbol);
+
+        if (stepSizeDown > 0)
+            amount -= stepSizeDown * stepSize;
+
+        var decimals = Math.Log10((double)stepSize);
+
+        var multiplyer = (decimal)Math.Pow(10, -decimals);
+
+        return Math.Floor(amount * multiplyer) / multiplyer;
+    }
+
+    #endregion Flatten Order Amount
+
+    #endregion Derived Methods
 }
 

@@ -119,6 +119,8 @@ public class Funding
         string? areaCode = null,
         string? clientId = null)
     {
+        chain = OkxClient.FormatNetworkName(currency, chain);
+
         if (fee == -1)
         {
             var data = Client.Funding.GetSingleCurrency(currency, chain);
@@ -161,6 +163,8 @@ public class Funding
         string? areaCode = null,
         string? clientId = null)
     {
+        chain = OkxClient.FormatNetworkName(currency, chain);
+
         if (fee == -1)
         {
             var data = await Client.Funding.GetSingleCurrencyAsync(currency, chain);
@@ -552,6 +556,8 @@ public class Funding
     /// <returns>Currency Information of a single currency on a particular network.</returns>
     public CurrencyInformation GetSingleCurrency(string currency, string network)
     {
+        network = OkxClient.FormatNetworkName(currency, network);
+
         var data = Client.Funding.GetCurrencies(new List<string> { currency });
 
         return FindNeededCurrencyInfo(data, currency, network);
@@ -565,6 +571,8 @@ public class Funding
     /// <returns>Currency Information of a single currency on a particular network.</returns>
     public async Task<CurrencyInformation> GetSingleCurrencyAsync(string currency, string network)
     {
+        network = OkxClient.FormatNetworkName(currency, network);
+
         var data = await Client.Funding.GetCurrenciesAsync(new List<string> { currency });
 
         return FindNeededCurrencyInfo(data, currency, network);
@@ -593,6 +601,8 @@ public class Funding
     /// <exception cref="Exception"></exception>
     public DepositAddress GetDepositAddress(string ccy, string network)
     {
+        network = OkxClient.FormatNetworkName(ccy, network);
+
         var addresses = GetDepositAddresses(ccy);
 
         var matching = addresses.Where(x => x.Chain.ToUpper() == network.ToUpper());
@@ -612,6 +622,8 @@ public class Funding
     /// <exception cref="Exception"></exception>
     public async Task<DepositAddress> GetDepositAddressAsync(string ccy, string network)
     {
+        network = OkxClient.FormatNetworkName(ccy, network);
+
         var addresses = await GetDepositAddressesAsync(ccy);
 
         var matching = addresses.Where(x => x.Chain.ToUpper() == network.ToUpper());

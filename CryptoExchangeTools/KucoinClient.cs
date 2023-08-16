@@ -1,9 +1,7 @@
 ﻿using CryptoExchangeTools.Models.ICex;
 using CryptoExchangeTools.Models.Kucoin;
 using CryptoExchangeTools.Requests.KucoinRequests;
-using Newtonsoft.Json;
 using RestSharp;
-using System.Globalization;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -246,6 +244,30 @@ public class KucoinClient : CexClient, ICexClient
         var address = await Deposit.GetDepositAddressAsync(currency, network);
 
         return address.Address;
+    }
+
+    public sealed override decimal GetBalance(string currency)
+    {
+        var data = Account.ListAccounts();
+
+        var currencyInfo = data.Where(x => x.Type == "main" && x.Currency.ToUpper() == currency.ToUpper());
+
+        if (!currencyInfo.Any())
+            return 0;
+
+        return currencyInfo.Single().Available;
+    }
+
+    public sealed override async Task<decimal> GetBalanceAsync(string currency)
+    {
+        var data = await Account.ListAccountsAsync();
+
+        var currencyInfo = data.Where(x => x.Type == "main" && x.Currency.ToUpper() == currency.ToUpper());
+
+        if (!currencyInfo.Any())
+            return 0;
+
+        return currencyInfo.Single().Available;
     }
 
     #endregion Global Methods

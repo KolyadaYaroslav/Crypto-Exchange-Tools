@@ -23,6 +23,8 @@ public class OkxClient : CexClient, ICexClient
 
     public PublicData PublicData { get; }
 
+    public Market Market { get; }
+
     public OkxClient(string apiKey, string apiSecret, string passPhrase, WebProxy? proxy = null) : base(apiKey, apiSecret, passPhrase, Url, proxy)
     {
         Account = new(this);
@@ -30,11 +32,13 @@ public class OkxClient : CexClient, ICexClient
         SubAccount = new(this);
         Trade = new(this);
         PublicData = new(this);
+        Market = new(this);
     }
 
     protected sealed override void TryLogin()
     {
         var request = new RestRequest("api/v5/system/status");
+
         var response = ExecuteRequestWithoutResponse(request, false);
 
         if (!response.IsSuccessful)
@@ -82,6 +86,19 @@ public class OkxClient : CexClient, ICexClient
         return response
             .Deserialize<BaseResponse>()
             .ParseData<T>();
+    }
+
+    /// <summary>
+    /// Okx has weird behaviour with networks, this may help! E.g. You have USDT on arbitrum, but you write USDT on ETH-Arbitrum One, this will format network name to USDT-Arbitrum One.
+    /// </summary>
+    /// <param name="currecy"></param>
+    /// <param name="network"></param>
+    /// <returns>Formatted network name.</returns>
+    public static string FormatNetworkName(string currency, string network)
+    {
+        var rawChain = network.Split('-')[1];
+
+        return $"{currency}-{rawChain}";
     }
 
     public WithdrawalRecord Withdraw(string currency, decimal amount, string address, string network, bool waitForApprove = true)
@@ -222,6 +239,169 @@ public class OkxClient : CexClient, ICexClient
     public sealed override async Task<decimal> ApproveReceivingAsync(string hash)
     {
         return await Funding.WaitForReceiveAsync(hash);
+    }
+
+    public sealed override decimal GetMarketPrice(string symbol)
+    {
+        return Market.GetMarketPrice(symbol);
+    }
+
+    public sealed override async Task<decimal> GetMarketPriceAsync(string symbol)
+    {
+        return await Market.GetMarketPriceAsync(symbol);
+    }
+
+    public sealed override decimal GetAmountIn(string currencyIn, string currencyOut, decimal amountOut, decimal slippage = 0.998m)
+    {
+        bool reversed = false;
+
+        string instId;
+
+        try
+        {
+            instId = PublicData.GetInstrumentName(currencyIn, currencyOut, InstrumentType.SPOT);
+        }
+        catch (Exception ex) when (ex.Message == "Can't find instrument!")
+        {
+            instId = PublicData.GetInstrumentName(currencyOut, currencyIn, InstrumentType.SPOT);
+            reversed = true;
+        }
+
+        decimal price = GetMarketPrice(instId);
+
+        if (reversed)
+            price = (1 / price);
+
+        Message($"Price: {price}");
+
+        return amountOut / slippage / price;
+    }
+
+    public sealed override async Task<decimal> GetAmountInAsync(string currencyIn, string currencyOut, decimal amountOut, decimal slippage = 0.998m)
+    {
+        bool reversed = false;
+
+        string instId;
+
+        try
+        {
+            instId = await PublicData.GetInstrumentNameAsync(currencyIn, currencyOut, InstrumentType.SPOT);
+        }
+        catch (Exception ex) when (ex.Message == "Can't find instrument!")
+        {
+            instId = await PublicData.GetInstrumentNameAsync(currencyOut, currencyIn, InstrumentType.SPOT);
+            reversed = true;
+        }
+
+        decimal price = await GetMarketPriceAsync(instId);
+
+        if (reversed)
+            price = (1 / price);
+
+        Message($"Price: {price}");
+
+        return amountOut / slippage / price;
+    }
+
+    public sealed override decimal ForcedMarketOrder(string baseCurrency, string quoteCurrency, OrderDirection direction, decimal amount, CalculationBase calculationBase = CalculationBase.Base)
+    {
+        string instId;
+
+        try
+        {
+            instId = PublicData.GetInstrumentName(baseCurrency, quoteCurrency, InstrumentType.SPOT);
+        }
+        catch (Exception ex) when (ex.Message == "Can't find instrument!")
+        {
+            instId = PublicData.GetInstrumentName(quoteCurrency, baseCurrency, InstrumentType.SPOT);
+
+            (quoteCurrency, baseCurrency) = (baseCurrency, quoteCurrency);
+
+            direction = HelperMethods.ReverseOrderDirection(direction);
+
+            calculationBase = HelperMethods.ReverseCalculationBase(calculationBase);
+        }
+
+        var orderSide = direction == OrderDirection.Buy ? OrderSide.buy : OrderSide.sell;
+
+        if (orderSide == OrderSide.buy && calculationBase == CalculationBase.Base)
+            amount = GetAmountIn(quoteCurrency, baseCurrency, amount);
+
+        else if(orderSide == OrderSide.sell && calculationBase == CalculationBase.Quote)
+            amount = GetAmountIn(baseCurrency, quoteCurrency, amount);
+
+        return Trade.TradeFromFunding(instId, orderSide, amount);
+    }
+
+    public sealed override async Task<decimal> ForcedMarketOrderAsync(string baseCurrency, string quoteCurrency, OrderDirection direction, decimal amount, CalculationBase calculationBase = CalculationBase.Base)
+    {
+        string instId;
+
+        try
+        {
+            instId = await PublicData.GetInstrumentNameAsync(baseCurrency, quoteCurrency, InstrumentType.SPOT);
+        }
+        catch (Exception ex) when (ex.Message == "Can't find instrument!")
+        {
+            instId = await PublicData.GetInstrumentNameAsync(quoteCurrency, baseCurrency, InstrumentType.SPOT);
+
+            (quoteCurrency, baseCurrency) = (baseCurrency, quoteCurrency);
+
+            direction = HelperMethods.ReverseOrderDirection(direction);
+
+            calculationBase = HelperMethods.ReverseCalculationBase(calculationBase);
+        }
+
+        var orderSide = direction == OrderDirection.Buy ? OrderSide.buy : OrderSide.sell;
+
+        if (orderSide == OrderSide.buy && calculationBase == CalculationBase.Base)
+            amount = await GetAmountInAsync(quoteCurrency, baseCurrency, amount);
+
+        else if (orderSide == OrderSide.sell && calculationBase == CalculationBase.Quote)
+            amount = await GetAmountInAsync(baseCurrency, quoteCurrency, amount);
+
+        return await Trade.TradeFromFundingAsync(instId, orderSide, amount);
+    }
+
+    public sealed override decimal GetMinOrderSizeForPair(string baseCurrency, string quoteCurrency, CalculationBase calculationBase = CalculationBase.Base)
+    {
+        string instId;
+
+        try
+        {
+            instId = PublicData.GetInstrumentName(baseCurrency, quoteCurrency, InstrumentType.SPOT);
+        }
+        catch (Exception ex) when (ex.Message == "Can't find instrument!")
+        {
+            instId = PublicData.GetInstrumentName(quoteCurrency, baseCurrency, InstrumentType.SPOT);
+
+            (quoteCurrency, baseCurrency) = (baseCurrency, quoteCurrency);
+
+            calculationBase = HelperMethods.ReverseCalculationBase(calculationBase);
+        }
+
+        var data = PublicData.GetSingleInstrument(instId, InstrumentType.SPOT);
+
+        var amount = data.MinSz;
+
+        if (calculationBase == CalculationBase.Quote)
+            return GetAmountIn(quoteCurrency, baseCurrency, amount, 1);
+
+        return amount;
+    }
+
+    public decimal GetDepositMinimum(string currency, string network)
+    {
+        var data =  Funding.GetCurrencies(new List<string> { currency });
+
+        return data.Where(x => x.Chain == network).Single().MinDep;
+    }
+
+    public async Task<decimal> GetDepositMinimumAsync(string currency, string network)
+    {
+        var data = await Funding.GetCurrenciesAsync(new List<string> { currency });
+
+        return data.Where(x => x.Chain == network).Single().MinDep;
     }
 }
 

@@ -403,9 +403,111 @@ public class Account
 
     #endregion Query Order
 
+    #region Get Futures Account Balance
+
+    public FuturesAccaountBalance[] GetFuturesAccaountBalances(long recvWindow = -1)
+    {
+        var request = BuildGetFuturesAccountBalance(recvWindow);
+
+        return Client.ExecuteRequest<FuturesAccaountBalance[]>(request);
+    }
+
+    public async Task<FuturesAccaountBalance[]> GetFuturesAccaountBalancesAsync(long recvWindow = -1)
+    {
+        var request = BuildGetFuturesAccountBalance(recvWindow);
+
+        return await Client.ExecuteRequestAsync<FuturesAccaountBalance[]>(request);
+    }
+
+    private static RestRequest BuildGetFuturesAccountBalance(long recvWindow = -1)
+    {
+        var request = new RestRequest("fapi/v2/balance", Method.Get);
+
+        if (recvWindow != -1)
+            request.AddParameter("recvWindow", recvWindow);
+
+        return request;
+    }
+
+    #endregion Get Futures Account Balance
+
     #endregion Original Methods
 
     #region Derived Methods
+
+    #region Flatten Order Amount
+
+    /// <summary>
+    /// Flatten order mount according to exchange trading filters.
+    /// </summary>
+    /// <param name="symbol">Trading ticekr</param>
+    /// <param name="amount">Initial amount</param>
+    /// <param name="stepSizeDown">Determines by how many trading steps the resulting amount will be decremented.</param>
+    /// <returns></returns>
+    public decimal FlattenOrderAmount(string symbol, decimal amount, int stepSizeDown = 0)
+    {
+        var stepSize = Client.USDM.Market.GetTradeStepSize(symbol);
+
+        if(stepSizeDown > 0)
+            amount -= stepSizeDown * stepSize;
+
+        var decimals = Math.Log10((double)stepSize);
+
+        var multiplyer = (decimal)Math.Pow(10, -decimals);
+
+        return Math.Floor(amount * multiplyer) / multiplyer;
+    }
+
+    /// <summary>
+    /// Flatten order mount according to exchange trading filters.
+    /// </summary>
+    /// <param name="symbol">Trading ticekr</param>
+    /// <param name="amount">Initial amount</param>
+    /// <param name="stepSizeDown">Determines by how many trading steps the resulting amount will be decremented.</param>
+    /// <returns></returns>
+    public async Task<decimal> FlattenOrderAmountAsync(string symbol, decimal amount, int stepSizeDown = 0)
+    {
+        var stepSize = await Client.USDM.Market.GetTradeStepSizeAsync(symbol);
+
+        if (stepSizeDown > 0)
+            amount -= stepSizeDown * stepSize;
+
+        var decimals = Math.Log10((double)stepSize);
+
+        var multiplyer = (decimal)Math.Pow(10, -decimals);
+
+        return Math.Floor(amount * multiplyer) / multiplyer;
+    }
+
+    #endregion Flatten Order Amount
+
+    #region Get Futures Acount Asset Balance
+
+    public FuturesAccaountBalance GetFuturesAcountAssetBalance(string asset)
+    {
+        var data = GetFuturesAccaountBalances();
+
+        var coin = data.Where(x => x.Asset == asset.ToUpper());
+
+        if (!coin.Any())
+            throw new Exception($"No Asset {asset} was found.");
+
+        return coin.Single();
+    }
+
+    public async Task<FuturesAccaountBalance> GetFuturesAcountAssetBalanceAsync(string asset)
+    {
+        var data = await GetFuturesAccaountBalancesAsync();
+
+        var coin = data.Where(x => x.Asset == asset.ToUpper());
+
+        if (!coin.Any())
+            throw new Exception($"No Asset {asset} was found.");
+
+        return coin.Single();
+    }
+
+    #endregion GetFuturesAcountAssetBalance
 
     #endregion Derived Methods
 }
