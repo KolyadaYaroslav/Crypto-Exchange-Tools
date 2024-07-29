@@ -400,3 +400,166 @@ public class CancelOrderResult
     [JsonProperty("sMsg")]
     public string? SMsg { get; set; }
 }
+
+public class TradeBalance
+{
+    [JsonProperty("adjEq")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal AdjEq { get; set; }
+
+    [JsonProperty("borrowFroz")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal BorrowFroz { get; set; }
+
+    [JsonProperty("details")]
+    public required TradeBalanceDetailData[] Details { get; set; }
+
+    [JsonProperty("imr")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal Imr { get; set; }
+
+    [JsonProperty("isoEq")]
+    [JsonConverter(typeof(StringToLongConverter))]
+    public long IsoEq { get; set; }
+
+    [JsonProperty("mgnRatio")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal MgnRatio { get; set; }
+
+    [JsonProperty("mmr")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal Mmr { get; set; }
+
+    [JsonProperty("notionalUsd")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal NotionalUsd { get; set; }
+
+    [JsonProperty("ordFroz")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal OrdFroz { get; set; }
+
+    [JsonProperty("totalEq")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal TotalEq { get; set; }
+
+    [JsonProperty("uTime")]
+    [JsonConverter(typeof(StringToLongConverter))]
+    public long UTime { get; set; }
+
+    [JsonProperty("upl")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal Upl { get; set; }
+    
+    public class TradeBalanceDetailData
+    {
+        [JsonProperty("availBal")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal AvailBal { get; set; }
+
+        [JsonProperty("availEq")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal AvailEq { get; set; }
+
+        [JsonProperty("borrowFroz")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal BorrowFroz { get; set; }
+
+        [JsonProperty("cashBal")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal CashBal { get; set; }
+
+        [JsonProperty("ccy")]
+        public required string Ccy { get; set; }
+
+        [JsonProperty("crossLiab")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal CrossLiab { get; set; }
+
+        [JsonProperty("disEq")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal DisEq { get; set; }
+
+        [JsonProperty("eq")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal Eq { get; set; }
+
+        [JsonProperty("eqUsd")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal EqUsd { get; set; }
+
+        [JsonProperty("fixedBal")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal FixedBal { get; set; }
+
+        [JsonProperty("frozenBal")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal FrozenBal { get; set; }
+
+        [JsonProperty("imr")]
+        public string? Imr { get; set; }
+
+        [JsonProperty("interest")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal Interest { get; set; }
+
+        [JsonProperty("isoEq")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal IsoEq { get; set; }
+
+        [JsonProperty("isoLiab")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal IsoLiab { get; set; }
+
+        [JsonProperty("isoUpl")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal IsoUpl { get; set; }
+
+        [JsonProperty("liab")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal Liab { get; set; }
+
+        [JsonProperty("maxLoan")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal MaxLoan { get; set; }
+
+        [JsonProperty("mgnRatio")]
+        public string? MgnRatio { get; set; }
+
+        [JsonProperty("mmr")]
+        public string? Mmr { get; set; }
+
+        [JsonProperty("notionalLever")]
+        public string? NotionalLever { get; set; }
+
+        [JsonProperty("ordFrozen")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal OrdFrozen { get; set; }
+
+        [JsonProperty("spotInUseAmt")]
+        public string? SpotInUseAmt { get; set; }
+
+        [JsonProperty("spotIsoBal")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal SpotIsoBal { get; set; }
+
+        [JsonProperty("stgyEq")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal StgyEq { get; set; }
+
+        [JsonProperty("twap")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal Twap { get; set; }
+
+        [JsonProperty("uTime")]
+        [JsonConverter(typeof(StringToLongConverter))]
+        public long UTime { get; set; }
+
+        [JsonProperty("upl")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal Upl { get; set; }
+
+        [JsonProperty("uplLiab")]
+        [JsonConverter(typeof(StringToDecimalConverter))]
+        public decimal UplLiab { get; set; }
+    }
+}

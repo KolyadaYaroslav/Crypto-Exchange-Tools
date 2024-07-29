@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Globalization;
+using Newtonsoft.Json;
 
 namespace CryptoExchangeTools.Models.Binance.Futures.USDM;
 
@@ -34,7 +35,7 @@ public class MarkData
     public long Time { get; set; }
 }
 
-public partial class ExchangeInformation
+public class ExchangeInformation
 {
     [JsonProperty("timezone")]
     public required string Timezone { get; set; }
@@ -52,7 +53,7 @@ public partial class ExchangeInformation
     public required SymbolData[] Symbols { get; set; }
 }
 
-public partial class RateLimit
+public class RateLimit
 {
     [JsonProperty("rateLimitType")]
     public required string RateLimitType { get; set; }
@@ -67,7 +68,7 @@ public partial class RateLimit
     public long Limit { get; set; }
 }
 
-public partial class SymbolData
+public class SymbolData
 {
     [JsonProperty("symbol")]
     public required string Symbol { get; set; }
@@ -133,7 +134,7 @@ public partial class SymbolData
     public string[]? AllowedSelfTradePreventionModes { get; set; }
 }
 
-public partial class Filter
+public class Filter
 {
     [JsonProperty("filterType")]
     public required string FilterType { get; set; }
@@ -216,4 +217,70 @@ public partial class Filter
 
     [JsonProperty("maxNumAlgoOrders", NullValueHandling = NullValueHandling.Ignore)]
     public long MaxNumAlgoOrders { get; set; }
+}
+
+public class FundingRateData
+{
+    [JsonProperty("symbol")]
+    public required string Symbol { get; set; }
+
+    [JsonProperty("markPrice")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal MarkPrice { get; set; }
+
+    [JsonProperty("fundingRate")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal FundingRate { get; set; }
+
+    [JsonProperty("fundingTime")]
+    public long FundingTime { get; set; }
+}
+
+public enum KlineInterval
+{
+    _1m,
+    _3m,
+    _5m,
+    _15m,
+    _30m,
+    _1h,
+    _2h,
+    _4h,
+    _6h,
+    _8h,
+    _12h,
+    _1d,
+    _3d,
+    _1w,
+    _1M
+}
+
+public class KlineData
+{
+    public long OpenTime { get; set; }
+    public decimal Open { get; set; }
+    public decimal High { get; set; }
+    public decimal Low { get; set; }
+    public decimal Close { get; set; }
+    public decimal Volume { get; set; }
+    public long CloseTime { get; set; }
+    public decimal QuoteAssetVolume { get; set; }
+    public long NumberOfTrades { get; set; }
+    public decimal TakerBuyBaseAssetVolume { get; set; }
+    public decimal TakerBuyQuoteAssetVolume { get; set; }
+
+    public KlineData(IReadOnlyList<object> rawObject)
+    {
+        OpenTime = (long)rawObject[0];
+        Open = decimal.Parse((string)rawObject[1], new CultureInfo("en-US"));
+        High = decimal.Parse((string)rawObject[2], new CultureInfo("en-US"));
+        Low = decimal.Parse((string)rawObject[3], new CultureInfo("en-US"));
+        Close = decimal.Parse((string)rawObject[4], new CultureInfo("en-US"));
+        Volume = decimal.Parse((string)rawObject[5], new CultureInfo("en-US"));
+        CloseTime = (long)rawObject[6];
+        QuoteAssetVolume = decimal.Parse((string)rawObject[7], new CultureInfo("en-US"));
+        NumberOfTrades = (long)rawObject[8];
+        TakerBuyBaseAssetVolume = decimal.Parse((string)rawObject[9], new CultureInfo("en-US"));
+        TakerBuyQuoteAssetVolume = decimal.Parse((string)rawObject[10], new CultureInfo("en-US"));
+    }
 }

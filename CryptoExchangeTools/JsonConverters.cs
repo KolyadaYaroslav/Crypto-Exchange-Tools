@@ -21,6 +21,10 @@ internal class StringToLongConverter : JsonConverter
         {
             return l;
         }
+        else
+        {
+            return 0L;
+        }
 
         throw new Exception("Cannot unmarshal type long");
     }

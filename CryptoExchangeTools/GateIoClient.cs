@@ -36,7 +36,7 @@ public class GateIoClient : CexClient, ICexClient
 
     #region Signature
 
-    internal sealed override void SignRequest(RestRequest request)
+    protected sealed override void SignRequest(RestRequest request)
     {
         var ts = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 

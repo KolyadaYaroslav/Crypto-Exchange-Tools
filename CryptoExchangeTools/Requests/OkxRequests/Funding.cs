@@ -719,6 +719,27 @@ public class Funding
 
     public decimal WaitForReceive(string hash)
     {
+        const int retries = 20;
+
+        for (int i = 0; i < retries; i++)
+        {
+            try
+            {
+                TryWaitForReceive(hash);
+            }
+            catch (RequestNotSuccessfulException ex)
+            {
+                Client.Message($"Request was not successful. Response: {ex.Response}");
+                Client.Message("Retrying after 1 minute.");
+                Task.Delay(60_000).Wait();
+            }
+        }
+        
+        return CheckDepositstatus(hash).Result;
+    }
+
+    private void TryWaitForReceive(string hash)
+    {
         for (int i = 0; i < 1000; i++)
         {
             var history = GetDepositHistory(txId: hash);
@@ -726,13 +747,34 @@ public class Funding
             if (history.Any())
                 break;
 
+            Client.Message("Deposit history is empty right now. Waiting for Okx to recognize transfer.");
+            
             Task.Delay(5000).Wait();
         }
-
-        return CheckDepositstatus(hash).Result;
     }
 
     public async Task<decimal> WaitForReceiveAsync(string hash)
+    {
+        const int retries = 20;
+
+        for (int i = 0; i < retries; i++)
+        {
+            try
+            {
+                await TryWaitForReceiveAsync(hash);
+            }
+            catch (RequestNotSuccessfulException ex)
+            {
+                Client.Message($"Request was not successful. Response: {ex.Response}");
+                Client.Message("Retrying after 1 minute.");
+                await Task.Delay(60_000);
+            }
+        }
+
+        return await CheckDepositstatus(hash);
+    }
+    
+    private async Task TryWaitForReceiveAsync(string hash)
     {
         for (int i = 0; i < 1000; i++)
         {
@@ -740,11 +782,11 @@ public class Funding
 
             if (history.Any())
                 break;
+            
+            Client.Message("Deposit history is empty right now. Waiting for Okx to recognize transfer.");
 
             await Task.Delay(5000);
         }
-
-        return await CheckDepositstatus(hash);
     }
 
     private async Task<decimal> CheckDepositstatus(string hash)
@@ -757,21 +799,20 @@ public class Funding
 
             Client.Message(tx.State.ToString());
 
-            if (tx.State == DepositStatus.depositCredited
-                || tx.State == DepositStatus.depositSuccessful)
-                return tx.Amt;
-
-            if (tx.State == DepositStatus.pendingDueToTemporaryDepositSuspensionOnThisCryptocurrency)
+            switch (tx.State)
             {
-                Client.Message("Waiting 15 minutes.");
-                await Task.Delay(15 * 60 * 1000);
+                case DepositStatus.depositCredited or DepositStatus.depositSuccessful:
+                    return tx.Amt;
+                case DepositStatus.pendingDueToTemporaryDepositSuspensionOnThisCryptocurrency:
+                    Client.Message("Waiting 15 minutes.");
+                    await Task.Delay(15 * 60 * 1000);
+                    break;
+                case DepositStatus.matchTheAddressBlacklist:
+                case DepositStatus.accountOrDepositIsFrozen:
+                case DepositStatus.subAccountDepositInterception:
+                case DepositStatus.KYClimit:
+                    throw new Exception($"tx status - {tx.State.ToString()}");
             }
-
-            if(tx.State == DepositStatus.matchTheAddressBlacklist
-                || tx.State == DepositStatus.accountOrDepositIsFrozen
-                || tx.State == DepositStatus.subAccountDepositInterception
-                || tx.State == DepositStatus.KYClimit)
-                throw new Exception($"tx status - {tx.State.ToString()}");
 
             await Task.Delay(5_000);
         }

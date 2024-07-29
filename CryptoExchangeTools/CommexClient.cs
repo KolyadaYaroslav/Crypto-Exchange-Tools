@@ -1,17 +1,17 @@
-﻿using System.Net;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using CryptoExchangeTools.Models.Binance;
+using CryptoExchangeTools.Models.ICex;
+using CryptoExchangeTools.Requests.CommexRequests;
 using Newtonsoft.Json.Linq;
 using RestSharp;
-using CryptoExchangeTools.Requests.BinanceRequests;
-using CryptoExchangeTools.Models.ICex;
-using CryptoExchangeTools.Models.Binance;
 
 namespace CryptoExchangeTools;
 
-public class BinanceClient : CexClient, ICexClient
+public class CommexClient : CexClient
 {
-    private const string Url = "https://api.binance.com";
+	private const string Url = "https://api.commex.com";
 
     public Wallet Wallet { get; }
 
@@ -31,14 +31,14 @@ public class BinanceClient : CexClient, ICexClient
     /// <param name="apiKey">Your api key</param>
     /// <param name="apiSecret">Your api secret</param>
     /// <param name="proxy">Proxy to be used with client</param>
-    public BinanceClient(string apiKey, string apiSecret, WebProxy? proxy = null) : base(apiKey, apiSecret, Url, proxy)
+    public CommexClient(string apiKey, string apiSecret, WebProxy? proxy = null) : base(apiKey, apiSecret, Url, proxy)
     {
-        Wallet = new(this);
-        Margin = new(this);
-        Trade = new(this);
-        FuturesTransfer = new(this);
-        Market = new(this);
-        Futures = new(apiKey, apiSecret, proxy);
+        Wallet = new Wallet(this);
+        Margin = new Margin(this);
+        Trade = new Trade(this);
+        FuturesTransfer = new FuturesTransfer(this);
+        Market = new Market(this);
+        Futures = new BinanceFuturesClient(apiKey, apiSecret, proxy);
     }
 
     protected sealed override void TryLogin()
@@ -434,4 +434,3 @@ public class BinanceClient : CexClient, ICexClient
         return await Market.GetMinOrderSizeForPairAsync(baseCurrency, quoteCurrency, calculationBase);
     }
 }
-

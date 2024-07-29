@@ -76,7 +76,7 @@ public abstract class CexClient : IDisposable
         restClient = new RestClient(restOptions);
     }
 
-    internal abstract void SignRequest(RestRequest request);
+    protected abstract void SignRequest(RestRequest request);
 
     protected virtual T DeserializeResponse<T>(RestResponse response)
     {
@@ -88,12 +88,12 @@ public abstract class CexClient : IDisposable
         if(needSign)
             SignRequest(request);
 
-        var response = restClient.Execute(request);
+        var response = restClient.Execute<T>(request);
 
         return DeserializeResponse<T>(response);
     }
 
-    internal async virtual Task<T> ExecuteRequestAsync<T>(RestRequest request, bool needSign = true)
+    internal virtual async Task<T> ExecuteRequestAsync<T>(RestRequest request, bool needSign = true)
     {
         if (needSign)
             SignRequest(request);
@@ -108,10 +108,10 @@ public abstract class CexClient : IDisposable
         if (needSign)
             SignRequest(request);
 
-        return restClient.Execute(request);
+        return restClient.Execute<int>(request);
     }
 
-    internal async virtual Task<RestResponse> ExecuteRequestWithoutResponseAsync(RestRequest request, bool needSign = true)
+    internal virtual async Task<RestResponse> ExecuteRequestWithoutResponseAsync(RestRequest request, bool needSign = true)
     {
         if (needSign)
             SignRequest(request);
@@ -211,12 +211,12 @@ public abstract class CexClient : IDisposable
         throw new NotImplementedException();
     }
 
-    public virtual decimal ForcedMarketOrder(string baseCurrency, string quoteCurrency, OrderDirection direction, decimal amount, CalculationBase calculationBase = CalculationBase.Base)
+    public virtual (decimal, decimal) ForcedMarketOrder(string baseCurrency, string quoteCurrency, OrderDirection direction, decimal amount, CalculationBase calculationBase = CalculationBase.Base)
     {
         throw new NotImplementedException();
     }
 
-    public virtual Task<decimal> ForcedMarketOrderAsync(string baseCurrency, string quoteCurrency, OrderDirection direction, decimal amount, CalculationBase calculationBase = CalculationBase.Base)
+    public virtual Task<(decimal, decimal)> ForcedMarketOrderAsync(string baseCurrency, string quoteCurrency, OrderDirection direction, decimal amount, CalculationBase calculationBase = CalculationBase.Base)
     {
         throw new NotImplementedException();
     }

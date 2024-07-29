@@ -45,7 +45,7 @@ public class OkxClient : CexClient, ICexClient
             throw new ConnectionNotSetException("Couldn't connect to Okx Server.", response.StatusCode, response.Content);
     }
 
-    internal sealed override void SignRequest(RestRequest request)
+    protected sealed override void SignRequest(RestRequest request)
     {
         if (string.IsNullOrEmpty(PassPhrase))
             throw new Exception("PassPhrase is not set for Okx client.");
@@ -61,7 +61,8 @@ public class OkxClient : CexClient, ICexClient
     private string Sign(RestRequest request, string ts)
     {
         var bodyParams = request.Parameters.Where(x => x.Type == ParameterType.RequestBody);
-        var body = bodyParams.Any() ? bodyParams.Single().Value?.ToString() : null;
+        var parameters = bodyParams as Parameter[] ?? bodyParams.ToArray();
+        var body = parameters.Any() ? parameters.Single().Value?.ToString() : null;
 
         var queryString = request.GetQueryString();
         var path = request.Resource + (!string.IsNullOrEmpty(queryString) ? $"?{queryString}" : null);
@@ -72,13 +73,11 @@ public class OkxClient : CexClient, ICexClient
 
         var key = Encoding.UTF8.GetBytes(ApiSecret);
 
-        using (HMACSHA256 hmacsha256 = new HMACSHA256(key))
-        {
-            byte[] payloadBytes = Encoding.UTF8.GetBytes(preHashString);
-            byte[] hash = hmacsha256.ComputeHash(payloadBytes);
+        using var hmacsha256 = new HMACSHA256(key);
+        byte[] payloadBytes = Encoding.UTF8.GetBytes(preHashString);
+        byte[] hash = hmacsha256.ComputeHash(payloadBytes);
 
-            return System.Convert.ToBase64String(hash);
-        }
+        return Convert.ToBase64String(hash);
     }
 
     protected sealed override T DeserializeResponse<T>(RestResponse response)
@@ -91,7 +90,7 @@ public class OkxClient : CexClient, ICexClient
     /// <summary>
     /// Okx has weird behaviour with networks, this may help! E.g. You have USDT on arbitrum, but you write USDT on ETH-Arbitrum One, this will format network name to USDT-Arbitrum One.
     /// </summary>
-    /// <param name="currecy"></param>
+    /// <param name="currency"></param>
     /// <param name="network"></param>
     /// <returns>Formatted network name.</returns>
     public static string FormatNetworkName(string currency, string network)
@@ -303,7 +302,7 @@ public class OkxClient : CexClient, ICexClient
         return amountOut / slippage / price;
     }
 
-    public sealed override decimal ForcedMarketOrder(string baseCurrency, string quoteCurrency, OrderDirection direction, decimal amount, CalculationBase calculationBase = CalculationBase.Base)
+    public sealed override (decimal, decimal) ForcedMarketOrder(string baseCurrency, string quoteCurrency, OrderDirection direction, decimal amount, CalculationBase calculationBase = CalculationBase.Base)
     {
         string instId;
 
@@ -324,16 +323,21 @@ public class OkxClient : CexClient, ICexClient
 
         var orderSide = direction == OrderDirection.Buy ? OrderSide.buy : OrderSide.sell;
 
-        if (orderSide == OrderSide.buy && calculationBase == CalculationBase.Base)
-            amount = GetAmountIn(quoteCurrency, baseCurrency, amount);
+        amount = orderSide switch
+        {
+            OrderSide.buy when calculationBase == CalculationBase.Base => GetAmountIn(quoteCurrency, baseCurrency,
+                amount),
+            OrderSide.sell when calculationBase == CalculationBase.Quote => GetAmountIn(baseCurrency, quoteCurrency,
+                amount),
+            _ => amount
+        };
 
-        else if(orderSide == OrderSide.sell && calculationBase == CalculationBase.Quote)
-            amount = GetAmountIn(baseCurrency, quoteCurrency, amount);
+        var executedQuantity = Trade.TradeFromFunding(instId, orderSide, amount);
 
-        return Trade.TradeFromFunding(instId, orderSide, amount);
+        return (executedQuantity, amount);
     }
 
-    public sealed override async Task<decimal> ForcedMarketOrderAsync(string baseCurrency, string quoteCurrency, OrderDirection direction, decimal amount, CalculationBase calculationBase = CalculationBase.Base)
+    public sealed override async Task<(decimal, decimal)> ForcedMarketOrderAsync(string baseCurrency, string quoteCurrency, OrderDirection direction, decimal amount, CalculationBase calculationBase = CalculationBase.Base)
     {
         string instId;
 
@@ -354,13 +358,18 @@ public class OkxClient : CexClient, ICexClient
 
         var orderSide = direction == OrderDirection.Buy ? OrderSide.buy : OrderSide.sell;
 
-        if (orderSide == OrderSide.buy && calculationBase == CalculationBase.Base)
-            amount = await GetAmountInAsync(quoteCurrency, baseCurrency, amount);
+        amount = orderSide switch
+        {
+            OrderSide.buy when calculationBase == CalculationBase.Base => await GetAmountInAsync(quoteCurrency,
+                baseCurrency, amount),
+            OrderSide.sell when calculationBase == CalculationBase.Quote => await GetAmountInAsync(baseCurrency,
+                quoteCurrency, amount),
+            _ => amount
+        };
 
-        else if (orderSide == OrderSide.sell && calculationBase == CalculationBase.Quote)
-            amount = await GetAmountInAsync(baseCurrency, quoteCurrency, amount);
-
-        return await Trade.TradeFromFundingAsync(instId, orderSide, amount);
+        var executedQuantity = await Trade.TradeFromFundingAsync(instId, orderSide, amount);
+        
+        return (executedQuantity, amount);
     }
 
     public sealed override decimal GetMinOrderSizeForPair(string baseCurrency, string quoteCurrency, CalculationBase calculationBase = CalculationBase.Base)

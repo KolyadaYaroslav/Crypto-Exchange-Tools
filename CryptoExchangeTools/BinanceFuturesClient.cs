@@ -20,7 +20,7 @@ namespace CryptoExchangeTools
             USDM = new(this);
         }
 
-        internal sealed override void SignRequest(RestRequest request)
+        protected sealed override void SignRequest(RestRequest request)
         {
             request.AddHeader("X-MBX-APIKEY", ApiKey);
             request.AddParameter("timestamp", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());

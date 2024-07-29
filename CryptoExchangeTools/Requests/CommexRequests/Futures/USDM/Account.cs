@@ -1,7 +1,7 @@
 ﻿using CryptoExchangeTools.Models.Binance.Futures.USDM;
 using RestSharp;
 
-namespace CryptoExchangeTools.Requests.BinanceRequests.Futures.USDM;
+namespace CryptoExchangeTools.Requests.CommexRequests.Futures.USDM;
 
 public class Account
 {

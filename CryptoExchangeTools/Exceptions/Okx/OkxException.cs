@@ -16,25 +16,24 @@ public class OkxException : Exception
 		var exceptions = ErrorCode.GetCodedErrors();
 
 		var matchinExceptions = exceptions
-			.Where(x => x.GetCustomAttributes(false)
-				.Where(x => x is ErrorCode)
-				.Select(x => x as ErrorCode)
+			.Where(x => x
+				.GetCustomAttributes(false)
+				.OfType<ErrorCode>()
 				.Single()?
-				.Code == code);
+				.Code == code)
+			.ToList();
 
 		if(!matchinExceptions.Any())
-            throw new OkxException($"[{code}] {message} {(data is not null ? data.ToString() : null)}");
+            throw new OkxException($"[{code}] {message} {data}");
 
         var exception = Activator.CreateInstance(matchinExceptions.Single(), message);
 
-		if (exception is null)
-			throw new OkxException($"[{code}] {message} {(data is not null ? data.ToString() : null)}");
-
-		if (exception is OkxException ex)
-			throw ex;
-
-		else
-            throw new OkxException($"[{code}] {message} {(data is not null ? data.ToString() : null)}");
-    }
+        throw exception switch
+        {
+	        null => new OkxException($"[{code}] {message} {data}"),
+	        OkxException ex => ex,
+	        _ => new OkxException($"[{code}] {message} {data}")
+        };
+	}
 }
 

@@ -1,15 +1,14 @@
-﻿using System.Linq;
-using CryptoExchangeTools.Models.Binance;
+﻿using CryptoExchangeTools.Models.Binance;
 using CryptoExchangeTools.Models.ICex;
 using RestSharp;
 
-namespace CryptoExchangeTools.Requests.BinanceRequests;
+namespace CryptoExchangeTools.Requests.CommexRequests;
 
 public class Market
 {
-	private readonly BinanceClient Client;
+	private readonly CommexClient Client;
 
-	public Market(BinanceClient client)
+	public Market(CommexClient client)
 	{
 		Client = client;
 	}

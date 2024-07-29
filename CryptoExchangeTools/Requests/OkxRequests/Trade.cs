@@ -21,6 +21,46 @@ public class Trade
 
     #region Original Methods
 
+    #region GetBalance
+
+    public TradeBalance[] GetBalances(params string[] currencies)
+    {
+        var request = BuildGetBalance(currencies);
+        
+        return Client.ExecuteRequest<TradeBalance[]>(request);
+    }
+    
+    public async Task<TradeBalance[]> GetBalancesAsync(params string[] currencies)
+    {
+        var request = BuildGetBalance(currencies);
+        
+        return await Client.ExecuteRequestAsync<TradeBalance[]>(request);
+    }
+
+    private static RestRequest BuildGetBalance(params string[] currencies)
+    {
+        var request = new RestRequest("api/v5/account/balance");
+
+        if (!currencies.Any())
+            return request;
+
+        switch (currencies.Length)
+        {
+            case 1:
+                request.AddParameter("ccy", currencies.Single().ToUpper());
+                break;
+            case > 20:
+                throw new Exception("No more than 20 currencies can be added for this request.");
+            default:
+                request.AddParameter("ccy", string.Join(',', currencies.Select(x => x.ToUpper())));
+                break;
+        }
+
+        return request;
+    }
+
+    #endregion
+
     #region Place order
 
     /// <summary>

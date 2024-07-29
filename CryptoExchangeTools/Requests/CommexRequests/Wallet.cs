@@ -1,16 +1,16 @@
 ﻿using System.Globalization;
+using CryptoExchangeTools.Models.Binance.Wallet;
 using RestSharp;
 using static CryptoExchangeTools.Models.Binance.Wallet.WithdrawHistoryRecord;
 using static CryptoExchangeTools.Models.Binance.Wallet.DepositHistory;
-using CryptoExchangeTools.Models.Binance.Wallet;
 
-namespace CryptoExchangeTools.Requests.BinanceRequests;
+namespace CryptoExchangeTools.Requests.CommexRequests;
 
 public class Wallet
 {
-    private readonly BinanceClient client;
+    private readonly CommexClient client;
 
-    public Wallet(BinanceClient client)
+    public Wallet(CommexClient client)
     {
         this.client = client;
         CultureInfo.CurrentCulture = new CultureInfo("en-US");
@@ -75,7 +75,7 @@ public class Wallet
         string? addressTag,
         int walletType)
     {
-        var request = new RestRequest("sapi/v1/capital/withdraw/apply", Method.Post);
+        var request = new RestRequest("api/v1/capital/withdraw/apply", Method.Post);
         request.AddParameter("coin", coin);
         request.AddParameter("address", address);
         request.AddParameter("amount", amount);
@@ -174,7 +174,7 @@ public class Wallet
         long endTime,
         long recvWindow)
         {
-        var request = new RestRequest("sapi/v1/capital/withdraw/history");
+        var request = new RestRequest("api/v1/capital/withdraw/history");
 
         if (coin is not null)
             request.AddParameter("coin", coin);
@@ -241,7 +241,7 @@ public class Wallet
 
     private static RestRequest BuildGetAssetDetail(string asset)
     {
-        var request = new RestRequest("sapi/v1/asset/assetDetail");
+        var request = new RestRequest("api/v1/asset/assetDetail");
 
         request.AddParameter("asset", asset.ToUpper());
 
@@ -276,7 +276,7 @@ public class Wallet
 
     private static RestRequest BuildGetAllCoinsInformation()
     {
-        var request = new RestRequest("sapi/v1/capital/config/getall");
+        var request = new RestRequest("api/v1/capital/config/getall");
 
         return request;
     }
@@ -323,7 +323,7 @@ public class Wallet
 
     private static RestRequest BuildGetUserAsset(string asset, bool needBtcValuation)
     {
-        var request = new RestRequest("/sapi/v3/asset/getUserAsset", Method.Post);
+        var request = new RestRequest("/api/v3/asset/getUserAsset", Method.Post);
         request.AddParameter("asset", asset);
 
         if (needBtcValuation)
@@ -362,7 +362,7 @@ public class Wallet
 
     private static RestRequest BuildGetUserAssets(bool needBtcValuation)
     {
-        var request = new RestRequest("sapi/v3/asset/getUserAsset", Method.Post);
+        var request = new RestRequest("api/v3/asset/getUserAsset", Method.Post);
 
         if (needBtcValuation)
             request.AddParameter("needBtcValuation", needBtcValuation);
@@ -455,7 +455,7 @@ public class Wallet
         int limit,
         long recvWindow)
     {
-        var request = new RestRequest("sapi/v1/capital/deposit/hisrec");
+        var request = new RestRequest("api/v1/capital/deposit/hisrec");
 
         if (coin is not null)
             request.AddParameter("coin", coin);
@@ -518,7 +518,7 @@ public class Wallet
 
     private static RestRequest BuildGetDepositAddress(string coin, string? network = null, long recvWindow = -1)
     {
-        var request = new RestRequest("sapi/v1/capital/deposit/address");
+        var request = new RestRequest("api/v1/capital/deposit/address");
 
         request.AddParameter("coin", coin);
 
@@ -822,8 +822,6 @@ public class Wallet
 
             if (history.Any())
                 break;
-            
-            client.Message("Deposit history is empty right now. Waiting for Binance to recognize transfer.");
 
             Task.Delay(5000).Wait();
         }
@@ -853,8 +851,6 @@ public class Wallet
 
             if(history.Any())
                 break;
-            
-            client.Message("Deposit history is empty right now. Waiting for Binance to recognize transfer.");
 
             await Task.Delay(5000);
         }

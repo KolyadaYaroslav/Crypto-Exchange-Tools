@@ -1,9 +1,7 @@
 ﻿using CryptoExchangeTools.Models.Binance.Futures.USDM;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using RestSharp;
 
-namespace CryptoExchangeTools.Requests.BinanceRequests.Futures.USDM;
+namespace CryptoExchangeTools.Requests.CommexRequests.Futures.USDM;
 
 public class Market
 {
@@ -114,97 +112,6 @@ public class Market
     }
 
     #endregion Get Exchange Information
-
-    #region Kline/Candlestick Data
-
-    /// <summary>
-    /// Kline/candlestick bars for a symbol. Klines are uniquely identified by their open time.
-    /// </summary>
-    /// <param name="symbol"></param>
-    /// <param name="interval"></param>
-    /// <param name="startTime">If startTime and endTime are not sent, the most recent klines are returned.</param>
-    /// <param name="endTime">If startTime and endTime are not sent, the most recent klines are returned.</param>
-    /// <param name="limit">Default 500; max 1500.</param>
-    /// <returns></returns>
-    public List<KlineData> GetKlineCandlestickData(
-        string symbol,
-        KlineInterval interval,
-        long startTime = -1,
-        long endTime = -1,
-        int limit = -1)
-    {
-        var request = BuildGetKlineCandlestickData(
-            symbol,
-            interval,
-            startTime,
-            endTime,
-            limit);
-
-        var rawResponse = Client.ExecuteRequest<object[][]>(request, false);
-
-        return rawResponse
-            .Select(row => new KlineData(row))
-            .OrderByDescending(x => x.CloseTime)
-            .ToList();
-    }
-    
-    /// <summary>
-    /// Kline/candlestick bars for a symbol. Klines are uniquely identified by their open time.
-    /// </summary>
-    /// <param name="symbol"></param>
-    /// <param name="interval"></param>
-    /// <param name="startTime">If startTime and endTime are not sent, the most recent klines are returned.</param>
-    /// <param name="endTime">If startTime and endTime are not sent, the most recent klines are returned.</param>
-    /// <param name="limit">Default 500; max 1500.</param>
-    /// <returns></returns>
-    public async Task<List<KlineData>> GetKlineCandlestickDataAsync(
-        string symbol,
-        KlineInterval interval,
-        long startTime = -1,
-        long endTime = -1,
-        int limit = -1)
-    {
-        var request = BuildGetKlineCandlestickData(
-            symbol,
-            interval,
-            startTime,
-            endTime,
-            limit);
-
-        var rawResponse = await Client.ExecuteRequestAsync<object[][]>(request, false);
-
-        return rawResponse
-            .Select(row => new KlineData(row))
-            .OrderByDescending(x => x.CloseTime)
-            .ToList();
-    }
-    
-    private static RestRequest BuildGetKlineCandlestickData(
-        string symbol,
-        KlineInterval interval,
-        long startTime,
-        long endTime,
-        int limit
-        )
-    {
-        var request = new RestRequest("fapi/v1/klines");
-
-        request.AddParameter("symbol", symbol.ToUpper());
-        request.AddParameter("interval", interval.ToString().Replace("_", ""));
-
-        if (startTime != -1)
-            request.AddParameter("startTime", startTime);
-        
-        if (endTime != -1)
-            request.AddParameter("endTime", endTime);
-        
-        if (limit != -1)
-            request.AddParameter("limit", limit);
-
-        return request;
-    }
-
-    #endregion
 
     #endregion Original Methods
 

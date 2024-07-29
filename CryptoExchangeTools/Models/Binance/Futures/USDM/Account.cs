@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+// ReSharper disable InconsistentNaming
 
 namespace CryptoExchangeTools.Models.Binance.Futures.USDM;
 
@@ -75,7 +76,7 @@ public enum NewOrderRespType
     RESULT
 }
 
-public partial class NewOrderResult
+public class NewOrderResult
 {
     [JsonProperty("clientOrderId")]
     public string? ClientOrderId { get; set; }
@@ -268,7 +269,7 @@ public class ChangeLeverageResponse
     public required string Symbol { get; set; }
 }
 
-public partial class Order
+public class Order
 {
     [JsonProperty("avgPrice")]
     [JsonConverter(typeof(StringToDecimalConverter))]
@@ -412,4 +413,78 @@ public class FuturesAccaountBalance
 
     [JsonProperty("updateTime")]
     public long UpdateTime { get; set; }
+}
+
+public class IncomeHistoryRecord
+{
+    /// <summary>
+    /// trade symbol, if existing
+    /// </summary>
+    [JsonProperty("symbol")]
+    public string? Symbol { get; set; }
+
+    /// <summary>
+    /// income type
+    /// </summary>
+    [JsonProperty("incomeType")]
+    [JsonConverter(typeof(StringEnumConverter))]
+    public IncomeType IncomeType { get; set; }
+
+    /// <summary>
+    /// income amount
+    /// </summary>
+    [JsonProperty("income")]
+    [JsonConverter(typeof(StringToDecimalConverter))]
+    public decimal Income { get; set; }
+
+    /// <summary>
+    /// income asset
+    /// </summary>
+    [JsonProperty("asset")]
+    public required string Asset { get; set; }
+
+    /// <summary>
+    /// extra information
+    /// </summary>
+    /// <returns></returns>
+    [JsonProperty("info")]
+    public string? Info { get; set; }
+
+    [JsonProperty("time")]
+    public long Time { get; set; }
+
+    /// <summary>
+    /// transaction id
+    /// </summary>
+    [JsonProperty("tranId")]
+    public required string TranId { get; set; }
+
+    /// <summary>
+    /// trade id, if existing
+    /// </summary>
+    [JsonProperty("tradeId")]
+    public object? TradeId { get; set; }
+}
+
+public enum IncomeType
+{
+    TRANSFER, 
+    WELCOME_BONUS, 
+    REALIZED_PNL, 
+    FUNDING_FEE, 
+    COMMISSION, 
+    INSURANCE_CLEAR, 
+    REFERRAL_KICKBACK, 
+    COMMISSION_REBATE, 
+    API_REBATE, 
+    CONTEST_REWARD, 
+    CROSS_COLLATERAL_TRANSFER, 
+    OPTIONS_PREMIUM_FEE, 
+    OPTIONS_SETTLE_PROFIT, 
+    INTERNAL_TRANSFER, 
+    AUTO_EXCHANGE, 
+    DELIVERED_SETTELMENT, 
+    COIN_SWAP_DEPOSIT, 
+    COIN_SWAP_WITHDRAW, 
+    POSITION_LIMIT_INCREASE_FEE
 }

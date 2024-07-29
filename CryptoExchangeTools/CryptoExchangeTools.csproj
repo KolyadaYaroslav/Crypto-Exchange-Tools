@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RestSharp" Version="110.1.0" />
+    <PackageReference Include="RestSharp" Version="110.2.1-alpha.0.16" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   <ItemGroup>
@@ -31,12 +31,10 @@
     <None Remove="Utility\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Models\" />
     <Folder Include="Models\Binance\" />
     <Folder Include="Models\Okx\" />
     <Folder Include="Models\GateIo\" />
     <Folder Include="Models\ICex\" />
-    <Folder Include="Requests\" />
     <Folder Include="Requests\OkxRequests\" />
     <Folder Include="Requests\BinanceRequests\" />
     <Folder Include="Requests\GateIoRequests\" />
@@ -48,6 +46,5 @@
     <Folder Include="Requests\BinanceRequests\Futures\" />
     <Folder Include="Requests\BinanceRequests\Futures\USDM\" />
     <Folder Include="Exceptions\Okx\" />
-    <Folder Include="Utility\" />
   </ItemGroup>
 </Project>

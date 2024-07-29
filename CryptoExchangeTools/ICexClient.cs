@@ -181,8 +181,8 @@ public interface ICexClient : IDisposable
     /// <param name="quoteCurrency"></param>
     /// <param name="direction">Buy or sell.</param>
     /// <param name="amount">Order quantity.</param>
-    /// <returns>Executed resulting quantity.</returns>
-    decimal ForcedMarketOrder(string baseCurrency, string quoteCurrency, OrderDirection direction, decimal amount, CalculationBase calculationBase = CalculationBase.Base);
+    /// <returns>First: Executed resulting quantity. Second: Consumed currency Quantity.</returns>
+    (decimal, decimal) ForcedMarketOrder(string baseCurrency, string quoteCurrency, OrderDirection direction, decimal amount, CalculationBase calculationBase = CalculationBase.Base);
 
     /// <summary>
     /// Place an order that will return only after it is fully filled. If it is not filled for long time - it will create a new order to fill the remaining amount.
@@ -191,8 +191,8 @@ public interface ICexClient : IDisposable
     /// <param name="quoteCurrency"></param>
     /// <param name="direction">Buy or sell.</param>
     /// <param name="amount">Order quantity.</param>
-    /// <returns>Executed resulting quantity.</returns>
-    Task<decimal> ForcedMarketOrderAsync(string baseCurrency, string quoteCurrency, OrderDirection direction, decimal amount, CalculationBase calculationBase = CalculationBase.Base);
+    /// <returns>First: Executed resulting quantity. Second: Consumed currency Quantity.</returns>
+    Task<(decimal, decimal)> ForcedMarketOrderAsync(string baseCurrency, string quoteCurrency, OrderDirection direction, decimal amount, CalculationBase calculationBase = CalculationBase.Base);
 
     /// <summary>
     /// Calculates the minimum order amount.

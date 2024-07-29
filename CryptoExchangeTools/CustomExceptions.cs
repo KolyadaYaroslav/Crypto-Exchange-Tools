@@ -35,7 +35,7 @@ public class RequestNotSuccessfulException : Exception
     public HttpStatusCode StatusCode;
     public string? Response;
 
-    public RequestNotSuccessfulException(string endpoint, HttpStatusCode statusCode, string? response) : base("Request was not successful.")
+    public RequestNotSuccessfulException(string endpoint, HttpStatusCode statusCode, string? response) : base($"Request to {endpoint} was not successful [{statusCode}]. {response}")
     {
         Endpoint = endpoint;
         StatusCode = statusCode;
